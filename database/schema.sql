@@ -2,351 +2,392 @@
 -- Modelo de datos: Sistema de prorrateo y distribución de costos
 -- Vertical inicial: Propiedad Horizontal / Real Estate
 --   (condominios, centros comerciales, coworkings, parques industriales)
--- Motor: MySQL 8.x / MariaDB 10.x — InnoDB, utf8mb4
--- Multi-tenancy: base de datos compartida, discriminador agrupacion_id
+-- Motor: SQL Server (Windows Hosting Ferozo/Donweb) — compatible con EF Core 8
+-- Multi-tenancy: base de datos compartida, discriminador AgrupacionId
 -- ============================================================================
-
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+-- Nota: los updated_at automáticos se manejan en la capa de aplicación
+-- (interceptor de SaveChanges en EF Core), no con triggers en SQL Server.
+-- ============================================================================
 
 -- ----------------------------------------------------------------------------
 -- 1. TENANT / AGRUPACIÓN (la entidad matriz)
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE tipos_agrupacion (
-    id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    codigo        VARCHAR(40)  NOT NULL UNIQUE,   -- CONDOMINIO, CENTRO_COMERCIAL, COWORKING, PARQUE_INDUSTRIAL
-    nombre        VARCHAR(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE TiposAgrupacion (
+    Id       INT IDENTITY(1,1) PRIMARY KEY,
+    Codigo   NVARCHAR(40)  NOT NULL,   -- CONDOMINIO, CENTRO_COMERCIAL, COWORKING, PARQUE_INDUSTRIAL
+    Nombre   NVARCHAR(100) NOT NULL,
+    CONSTRAINT UQ_TiposAgrupacion_Codigo UNIQUE (Codigo)
+);
+GO
 
-CREATE TABLE agrupaciones (
-    id                  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    tipo_agrupacion_id  INT UNSIGNED NOT NULL,
-    nombre              VARCHAR(150) NOT NULL,
-    identificacion_fiscal VARCHAR(40)  NULL,
-    moneda              CHAR(3)      NOT NULL DEFAULT 'USD',
-    direccion           VARCHAR(255) NULL,
-    dia_corte_facturacion TINYINT UNSIGNED NOT NULL DEFAULT 1,   -- día del mes en que se cierra el periodo
-    tasa_interes_mora   DECIMAL(6,4) NOT NULL DEFAULT 0,          -- % mensual
-    configuracion       JSON         NULL,                        -- settings flexibles por tenant
-    activo              BOOLEAN      NOT NULL DEFAULT TRUE,
-    created_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at          TIMESTAMP    NULL,
-    CONSTRAINT fk_agrupaciones_tipo FOREIGN KEY (tipo_agrupacion_id) REFERENCES tipos_agrupacion(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE Agrupaciones (
+    Id                   BIGINT IDENTITY(1,1) PRIMARY KEY,
+    TipoAgrupacionId     INT NOT NULL,
+    Nombre               NVARCHAR(150) NOT NULL,
+    IdentificacionFiscal NVARCHAR(40)  NULL,
+    Moneda               CHAR(3)       NOT NULL DEFAULT 'USD',
+    Direccion            NVARCHAR(255) NULL,
+    DiaCorteFacturacion  TINYINT       NOT NULL DEFAULT 1,   -- día del mes en que se cierra el periodo
+    TasaInteresMora      DECIMAL(6,4)  NOT NULL DEFAULT 0,    -- % mensual
+    Configuracion        NVARCHAR(MAX) NULL,                  -- settings flexibles por tenant (JSON)
+    Activo               BIT           NOT NULL DEFAULT 1,
+    CreatedAt            DATETIME2     NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt            DATETIME2     NOT NULL DEFAULT SYSUTCDATETIME(),
+    DeletedAt            DATETIME2     NULL,
+    CONSTRAINT FK_Agrupaciones_Tipo FOREIGN KEY (TipoAgrupacionId) REFERENCES TiposAgrupacion(Id),
+    CONSTRAINT CK_Agrupaciones_Configuracion CHECK (Configuracion IS NULL OR ISJSON(Configuracion) = 1)
+);
+GO
 
 -- ----------------------------------------------------------------------------
 -- 2. UNIDADES (subentidades) y su coeficiente histórico
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE unidades (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NOT NULL,
-    codigo          VARCHAR(40)  NOT NULL,             -- "Apto 501", "Local 12", "Oficina 3B"
-    tipo_unidad     VARCHAR(40)  NOT NULL,              -- residencial, comercial, bodega, oficina, lote
-    area_m2         DECIMAL(10,2) NULL,
-    estado          ENUM('activo','inactivo') NOT NULL DEFAULT 'activo',
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at      TIMESTAMP NULL,
-    CONSTRAINT fk_unidades_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    UNIQUE KEY uq_unidad_codigo (agrupacion_id, codigo)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE Unidades (
+    Id            BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId  BIGINT NOT NULL,
+    Codigo        NVARCHAR(40) NOT NULL,             -- "Apto 501", "Local 12", "Oficina 3B"
+    TipoUnidad    NVARCHAR(40) NOT NULL,              -- residencial, comercial, bodega, oficina, lote
+    AreaM2        DECIMAL(10,2) NULL,
+    Estado        NVARCHAR(20) NOT NULL DEFAULT 'activo',
+    CreatedAt     DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt     DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    DeletedAt     DATETIME2 NULL,
+    CONSTRAINT FK_Unidades_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT UQ_Unidades_Codigo UNIQUE (AgrupacionId, Codigo),
+    CONSTRAINT CK_Unidades_Estado CHECK (Estado IN ('activo','inactivo'))
+);
+GO
 
 -- El coeficiente/alícuota puede cambiar en el tiempo (remodelaciones, subdivisiones).
--- Se historiza en vez de guardarlo como columna fija en `unidades`.
-CREATE TABLE unidad_coeficientes (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    unidad_id       BIGINT UNSIGNED NOT NULL,
-    coeficiente     DECIMAL(9,6) NOT NULL,          -- ej. 0.008345 (participación sobre el total)
-    vigente_desde   DATE NOT NULL,
-    vigente_hasta   DATE NULL,                      -- NULL = vigente actualmente
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_coef_unidad FOREIGN KEY (unidad_id) REFERENCES unidades(id),
-    KEY idx_coef_vigencia (unidad_id, vigente_desde, vigente_hasta)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Se historiza en vez de guardarlo como columna fija en Unidades.
+CREATE TABLE UnidadCoeficientes (
+    Id            BIGINT IDENTITY(1,1) PRIMARY KEY,
+    UnidadId      BIGINT NOT NULL,
+    Coeficiente   DECIMAL(9,6) NOT NULL,          -- ej. 0.008345 (participación sobre el total)
+    VigenteDesde  DATE NOT NULL,
+    VigenteHasta  DATE NULL,                      -- NULL = vigente actualmente
+    CreatedAt     DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Coef_Unidad FOREIGN KEY (UnidadId) REFERENCES Unidades(Id)
+);
+GO
+CREATE INDEX IX_UnidadCoeficientes_Vigencia ON UnidadCoeficientes (UnidadId, VigenteDesde, VigenteHasta);
+GO
 
 -- ----------------------------------------------------------------------------
 -- 3. PERSONAS / TERCEROS
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE personas (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    tipo_documento  VARCHAR(10)  NULL,
-    numero_documento VARCHAR(40) NULL,
-    nombre          VARCHAR(150) NOT NULL,
-    email           VARCHAR(150) NULL,
-    telefono        VARCHAR(40)  NULL,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_persona_doc (tipo_documento, numero_documento)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE Personas (
+    Id               BIGINT IDENTITY(1,1) PRIMARY KEY,
+    TipoDocumento    NVARCHAR(10)  NULL,
+    NumeroDocumento  NVARCHAR(40)  NULL,
+    Nombre           NVARCHAR(150) NOT NULL,
+    Email            NVARCHAR(150) NULL,
+    Telefono         NVARCHAR(40)  NULL,
+    CreatedAt        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT UQ_Personas_Doc UNIQUE (TipoDocumento, NumeroDocumento)
+);
+GO
 
 -- Relación N:M entre unidades y personas, con rol e histórico (propietario cambia, arrendatario cambia)
-CREATE TABLE unidad_persona (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    unidad_id       BIGINT UNSIGNED NOT NULL,
-    persona_id      BIGINT UNSIGNED NOT NULL,
-    rol             ENUM('propietario','arrendatario','autorizado') NOT NULL,
-    responsable_pago BOOLEAN NOT NULL DEFAULT TRUE,
-    fecha_desde     DATE NOT NULL,
-    fecha_hasta     DATE NULL,
-    CONSTRAINT fk_up_unidad FOREIGN KEY (unidad_id) REFERENCES unidades(id),
-    CONSTRAINT fk_up_persona FOREIGN KEY (persona_id) REFERENCES personas(id),
-    KEY idx_up_vigencia (unidad_id, rol, fecha_desde, fecha_hasta)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE UnidadPersona (
+    Id               BIGINT IDENTITY(1,1) PRIMARY KEY,
+    UnidadId         BIGINT NOT NULL,
+    PersonaId        BIGINT NOT NULL,
+    Rol              NVARCHAR(20) NOT NULL,
+    ResponsablePago  BIT NOT NULL DEFAULT 1,
+    FechaDesde       DATE NOT NULL,
+    FechaHasta       DATE NULL,
+    CONSTRAINT FK_UP_Unidad FOREIGN KEY (UnidadId) REFERENCES Unidades(Id),
+    CONSTRAINT FK_UP_Persona FOREIGN KEY (PersonaId) REFERENCES Personas(Id),
+    CONSTRAINT CK_UP_Rol CHECK (Rol IN ('propietario','arrendatario','autorizado'))
+);
+GO
+CREATE INDEX IX_UnidadPersona_Vigencia ON UnidadPersona (UnidadId, Rol, FechaDesde, FechaHasta);
+GO
 
--- Usuarios del sistema (login), separados de "personas" del negocio
-CREATE TABLE roles (
-    id      INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    codigo  VARCHAR(40) NOT NULL UNIQUE,   -- ADMIN_PLATAFORMA, ADMIN_AGRUPACION, PROPIETARIO, CONTADOR
-    nombre  VARCHAR(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Usuarios del sistema (login vía ASP.NET Core Identity), separados de "Personas" del negocio
+CREATE TABLE Roles (
+    Id      INT IDENTITY(1,1) PRIMARY KEY,
+    Codigo  NVARCHAR(40)  NOT NULL,   -- ADMIN_PLATAFORMA, ADMIN_AGRUPACION, PROPIETARIO, CONTADOR
+    Nombre  NVARCHAR(100) NOT NULL,
+    CONSTRAINT UQ_Roles_Codigo UNIQUE (Codigo)
+);
+GO
 
-CREATE TABLE usuarios (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NULL,          -- NULL = usuario de plataforma (soporte/super-admin)
-    persona_id      BIGINT UNSIGNED NULL,
-    rol_id          INT UNSIGNED NOT NULL,
-    email           VARCHAR(150) NOT NULL UNIQUE,
-    password_hash   VARCHAR(255) NOT NULL,
-    activo          BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_usuarios_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    CONSTRAINT fk_usuarios_persona FOREIGN KEY (persona_id) REFERENCES personas(id),
-    CONSTRAINT fk_usuarios_rol FOREIGN KEY (rol_id) REFERENCES roles(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE Usuarios (
+    Id             BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId   BIGINT NULL,          -- NULL = usuario de plataforma (soporte/super-admin)
+    PersonaId      BIGINT NULL,
+    RolId          INT NOT NULL,
+    Email          NVARCHAR(150) NOT NULL,
+    PasswordHash   NVARCHAR(255) NOT NULL,
+    Activo         BIT NOT NULL DEFAULT 1,
+    CreatedAt      DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt      DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Usuarios_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT FK_Usuarios_Persona FOREIGN KEY (PersonaId) REFERENCES Personas(Id),
+    CONSTRAINT FK_Usuarios_Rol FOREIGN KEY (RolId) REFERENCES Roles(Id),
+    CONSTRAINT UQ_Usuarios_Email UNIQUE (Email)
+);
+GO
 
 -- ----------------------------------------------------------------------------
 -- 4. CATÁLOGOS DE PRORRATEO Y GASTOS
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE metodos_prorrateo (
-    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    codigo      VARCHAR(30) NOT NULL UNIQUE,   -- COEFICIENTE, PARTES_IGUALES, AREA, CONSUMO, DIRECTO
-    nombre      VARCHAR(100) NOT NULL,
-    descripcion VARCHAR(255) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE MetodosProrrateo (
+    Id           INT IDENTITY(1,1) PRIMARY KEY,
+    Codigo       NVARCHAR(30) NOT NULL,   -- COEFICIENTE, PARTES_IGUALES, AREA, CONSUMO, DIRECTO
+    Nombre       NVARCHAR(100) NOT NULL,
+    Descripcion  NVARCHAR(255) NULL,
+    CONSTRAINT UQ_MetodosProrrateo_Codigo UNIQUE (Codigo)
+);
+GO
 
-CREATE TABLE proveedores (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NOT NULL,
-    razon_social    VARCHAR(150) NOT NULL,
-    identificacion_fiscal VARCHAR(40) NULL,
-    categoria       VARCHAR(60) NULL,          -- seguridad, aseo, mantenimiento, servicios_publicos
-    contacto        VARCHAR(150) NULL,
-    CONSTRAINT fk_proveedores_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE Proveedores (
+    Id                   BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId         BIGINT NOT NULL,
+    RazonSocial          NVARCHAR(150) NOT NULL,
+    IdentificacionFiscal NVARCHAR(40) NULL,
+    Categoria            NVARCHAR(60) NULL,          -- seguridad, aseo, mantenimiento, servicios_publicos
+    Contacto             NVARCHAR(150) NULL,
+    CONSTRAINT FK_Proveedores_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id)
+);
+GO
 
-CREATE TABLE conceptos_gasto (
-    id                      BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id           BIGINT UNSIGNED NOT NULL,
-    nombre                  VARCHAR(120) NOT NULL,     -- "Vigilancia", "Aseo zonas comunes", "Internet"
-    naturaleza              ENUM('fijo','variable') NOT NULL,
-    metodo_prorrateo_id     INT UNSIGNED NOT NULL,     -- método por defecto
-    activo                  BOOLEAN NOT NULL DEFAULT TRUE,
-    CONSTRAINT fk_concepto_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    CONSTRAINT fk_concepto_metodo FOREIGN KEY (metodo_prorrateo_id) REFERENCES metodos_prorrateo(id),
-    UNIQUE KEY uq_concepto_nombre (agrupacion_id, nombre)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE ConceptosGasto (
+    Id                  BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId        BIGINT NOT NULL,
+    Nombre              NVARCHAR(120) NOT NULL,     -- "Vigilancia", "Aseo zonas comunes", "Internet"
+    Naturaleza          NVARCHAR(20) NOT NULL,       -- fijo, variable
+    MetodoProrrateoId   INT NOT NULL,                -- método por defecto
+    Activo              BIT NOT NULL DEFAULT 1,
+    CONSTRAINT FK_Concepto_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT FK_Concepto_Metodo FOREIGN KEY (MetodoProrrateoId) REFERENCES MetodosProrrateo(Id),
+    CONSTRAINT UQ_Concepto_Nombre UNIQUE (AgrupacionId, Nombre),
+    CONSTRAINT CK_Concepto_Naturaleza CHECK (Naturaleza IN ('fijo','variable'))
+);
+GO
 
 -- ----------------------------------------------------------------------------
 -- 5. PERIODOS DE FACTURACIÓN
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE periodos (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NOT NULL,
-    anio            SMALLINT UNSIGNED NOT NULL,
-    mes             TINYINT UNSIGNED NOT NULL,
-    fecha_inicio    DATE NOT NULL,
-    fecha_fin       DATE NOT NULL,
-    estado          ENUM('abierto','cerrado') NOT NULL DEFAULT 'abierto',
-    fecha_cierre    TIMESTAMP NULL,
-    CONSTRAINT fk_periodo_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    UNIQUE KEY uq_periodo (agrupacion_id, anio, mes)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE Periodos (
+    Id             BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId   BIGINT NOT NULL,
+    Anio           SMALLINT NOT NULL,
+    Mes            TINYINT NOT NULL,
+    FechaInicio    DATE NOT NULL,
+    FechaFin       DATE NOT NULL,
+    Estado         NVARCHAR(20) NOT NULL DEFAULT 'abierto',
+    FechaCierre    DATETIME2 NULL,
+    CONSTRAINT FK_Periodo_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT UQ_Periodo UNIQUE (AgrupacionId, Anio, Mes),
+    CONSTRAINT CK_Periodo_Estado CHECK (Estado IN ('abierto','cerrado'))
+);
+GO
 
 -- ----------------------------------------------------------------------------
 -- 6. GASTOS (Y) Y SU PRORRATEO
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE gastos (
-    id                  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id       BIGINT UNSIGNED NOT NULL,
-    periodo_id          BIGINT UNSIGNED NOT NULL,
-    concepto_id         BIGINT UNSIGNED NOT NULL,
-    proveedor_id        BIGINT UNSIGNED NULL,
-    metodo_prorrateo_id INT UNSIGNED NOT NULL,     -- puede sobreescribir el default del concepto
-    monto               DECIMAL(14,2) NOT NULL,
-    fecha_gasto         DATE NOT NULL,
-    descripcion         VARCHAR(255) NULL,
-    comprobante_url     VARCHAR(255) NULL,
-    estado              ENUM('pendiente','prorrateado','anulado') NOT NULL DEFAULT 'pendiente',
-    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_gasto_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    CONSTRAINT fk_gasto_periodo FOREIGN KEY (periodo_id) REFERENCES periodos(id),
-    CONSTRAINT fk_gasto_concepto FOREIGN KEY (concepto_id) REFERENCES conceptos_gasto(id),
-    CONSTRAINT fk_gasto_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores(id),
-    CONSTRAINT fk_gasto_metodo FOREIGN KEY (metodo_prorrateo_id) REFERENCES metodos_prorrateo(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE Gastos (
+    Id                  BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId        BIGINT NOT NULL,
+    PeriodoId           BIGINT NOT NULL,
+    ConceptoId          BIGINT NOT NULL,
+    ProveedorId         BIGINT NULL,
+    MetodoProrrateoId   INT NOT NULL,     -- puede sobreescribir el default del concepto
+    Monto               DECIMAL(14,2) NOT NULL,
+    FechaGasto          DATE NOT NULL,
+    Descripcion         NVARCHAR(255) NULL,
+    ComprobanteUrl      NVARCHAR(255) NULL,
+    Estado              NVARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    CreatedAt           DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Gasto_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT FK_Gasto_Periodo FOREIGN KEY (PeriodoId) REFERENCES Periodos(Id),
+    CONSTRAINT FK_Gasto_Concepto FOREIGN KEY (ConceptoId) REFERENCES ConceptosGasto(Id),
+    CONSTRAINT FK_Gasto_Proveedor FOREIGN KEY (ProveedorId) REFERENCES Proveedores(Id),
+    CONSTRAINT FK_Gasto_Metodo FOREIGN KEY (MetodoProrrateoId) REFERENCES MetodosProrrateo(Id),
+    CONSTRAINT CK_Gasto_Estado CHECK (Estado IN ('pendiente','prorrateado','anulado'))
+);
+GO
 
 -- Resultado congelado (auditoría) de distribuir un gasto entre unidades.
 -- No se recalcula on-the-fly: es la fuente de verdad de "qué se le cobró a quién y por qué".
-CREATE TABLE gasto_prorrateos (
-    id                  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    gasto_id            BIGINT UNSIGNED NOT NULL,
-    unidad_id           BIGINT UNSIGNED NOT NULL,
-    monto_asignado      DECIMAL(14,2) NOT NULL,
-    coeficiente_aplicado DECIMAL(9,6) NULL,
-    base_calculo        DECIMAL(14,4) NULL,        -- ej. m2 o unidades de consumo usadas en el cálculo
-    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_gp_gasto FOREIGN KEY (gasto_id) REFERENCES gastos(id),
-    CONSTRAINT fk_gp_unidad FOREIGN KEY (unidad_id) REFERENCES unidades(id),
-    UNIQUE KEY uq_gasto_unidad (gasto_id, unidad_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE GastoProrrateos (
+    Id                    BIGINT IDENTITY(1,1) PRIMARY KEY,
+    GastoId               BIGINT NOT NULL,
+    UnidadId              BIGINT NOT NULL,
+    MontoAsignado         DECIMAL(14,2) NOT NULL,
+    CoeficienteAplicado   DECIMAL(9,6) NULL,
+    BaseCalculo           DECIMAL(14,4) NULL,        -- ej. m2 o unidades de consumo usadas en el cálculo
+    CreatedAt             DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_GP_Gasto FOREIGN KEY (GastoId) REFERENCES Gastos(Id),
+    CONSTRAINT FK_GP_Unidad FOREIGN KEY (UnidadId) REFERENCES Unidades(Id),
+    CONSTRAINT UQ_Gasto_Unidad UNIQUE (GastoId, UnidadId)
+);
+GO
 
 -- ----------------------------------------------------------------------------
 -- 7. CARGOS (estado de cuenta por unidad y periodo) Y PAGOS
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE cargos (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NOT NULL,
-    unidad_id       BIGINT UNSIGNED NOT NULL,
-    periodo_id      BIGINT UNSIGNED NOT NULL,
-    saldo_anterior  DECIMAL(14,2) NOT NULL DEFAULT 0,
-    total_gastos    DECIMAL(14,2) NOT NULL DEFAULT 0,
-    intereses_mora  DECIMAL(14,2) NOT NULL DEFAULT 0,
-    total           DECIMAL(14,2) NOT NULL DEFAULT 0,
-    saldo_pendiente DECIMAL(14,2) NOT NULL DEFAULT 0,
-    estado          ENUM('pendiente','parcial','pagado','vencido') NOT NULL DEFAULT 'pendiente',
-    fecha_vencimiento DATE NOT NULL,
-    CONSTRAINT fk_cargo_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    CONSTRAINT fk_cargo_unidad FOREIGN KEY (unidad_id) REFERENCES unidades(id),
-    CONSTRAINT fk_cargo_periodo FOREIGN KEY (periodo_id) REFERENCES periodos(id),
-    UNIQUE KEY uq_cargo_unidad_periodo (unidad_id, periodo_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE Cargos (
+    Id                BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId      BIGINT NOT NULL,
+    UnidadId          BIGINT NOT NULL,
+    PeriodoId         BIGINT NOT NULL,
+    SaldoAnterior     DECIMAL(14,2) NOT NULL DEFAULT 0,
+    TotalGastos       DECIMAL(14,2) NOT NULL DEFAULT 0,
+    InteresesMora     DECIMAL(14,2) NOT NULL DEFAULT 0,
+    Total             DECIMAL(14,2) NOT NULL DEFAULT 0,
+    SaldoPendiente    DECIMAL(14,2) NOT NULL DEFAULT 0,
+    Estado            NVARCHAR(20) NOT NULL DEFAULT 'pendiente',
+    FechaVencimiento  DATE NOT NULL,
+    CONSTRAINT FK_Cargo_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT FK_Cargo_Unidad FOREIGN KEY (UnidadId) REFERENCES Unidades(Id),
+    CONSTRAINT FK_Cargo_Periodo FOREIGN KEY (PeriodoId) REFERENCES Periodos(Id),
+    CONSTRAINT UQ_Cargo_Unidad_Periodo UNIQUE (UnidadId, PeriodoId),
+    CONSTRAINT CK_Cargo_Estado CHECK (Estado IN ('pendiente','parcial','pagado','vencido'))
+);
+GO
 
-CREATE TABLE cargo_detalles (
-    id                  BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    cargo_id            BIGINT UNSIGNED NOT NULL,
-    gasto_prorrateo_id  BIGINT UNSIGNED NULL,      -- NULL si es un ajuste manual o interés
-    concepto            VARCHAR(150) NOT NULL,
-    monto               DECIMAL(14,2) NOT NULL,
-    CONSTRAINT fk_cd_cargo FOREIGN KEY (cargo_id) REFERENCES cargos(id),
-    CONSTRAINT fk_cd_gp FOREIGN KEY (gasto_prorrateo_id) REFERENCES gasto_prorrateos(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE CargoDetalles (
+    Id                 BIGINT IDENTITY(1,1) PRIMARY KEY,
+    CargoId            BIGINT NOT NULL,
+    GastoProrrateoId   BIGINT NULL,      -- NULL si es un ajuste manual o interés
+    Concepto           NVARCHAR(150) NOT NULL,
+    Monto              DECIMAL(14,2) NOT NULL,
+    CONSTRAINT FK_CD_Cargo FOREIGN KEY (CargoId) REFERENCES Cargos(Id),
+    CONSTRAINT FK_CD_GP FOREIGN KEY (GastoProrrateoId) REFERENCES GastoProrrateos(Id)
+);
+GO
 
-CREATE TABLE pagos (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NOT NULL,
-    unidad_id       BIGINT UNSIGNED NOT NULL,
-    persona_id      BIGINT UNSIGNED NULL,
-    monto           DECIMAL(14,2) NOT NULL,
-    fecha_pago      DATE NOT NULL,
-    medio_pago      VARCHAR(40) NOT NULL,          -- efectivo, transferencia, pasarela, cheque
-    referencia      VARCHAR(120) NULL,
-    estado          ENUM('confirmado','pendiente','rechazado') NOT NULL DEFAULT 'confirmado',
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_pago_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    CONSTRAINT fk_pago_unidad FOREIGN KEY (unidad_id) REFERENCES unidades(id),
-    CONSTRAINT fk_pago_persona FOREIGN KEY (persona_id) REFERENCES personas(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE Pagos (
+    Id             BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId   BIGINT NOT NULL,
+    UnidadId       BIGINT NOT NULL,
+    PersonaId      BIGINT NULL,
+    Monto          DECIMAL(14,2) NOT NULL,
+    FechaPago      DATE NOT NULL,
+    MedioPago      NVARCHAR(40) NOT NULL,          -- efectivo, transferencia, pasarela, cheque
+    Referencia     NVARCHAR(120) NULL,
+    Estado         NVARCHAR(20) NOT NULL DEFAULT 'confirmado',
+    CreatedAt      DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Pago_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT FK_Pago_Unidad FOREIGN KEY (UnidadId) REFERENCES Unidades(Id),
+    CONSTRAINT FK_Pago_Persona FOREIGN KEY (PersonaId) REFERENCES Personas(Id),
+    CONSTRAINT CK_Pago_Estado CHECK (Estado IN ('confirmado','pendiente','rechazado'))
+);
+GO
 
 -- Un pago puede aplicarse (total o parcialmente) a uno o más cargos, típicamente FIFO
-CREATE TABLE pago_aplicaciones (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    pago_id         BIGINT UNSIGNED NOT NULL,
-    cargo_id        BIGINT UNSIGNED NOT NULL,
-    monto_aplicado  DECIMAL(14,2) NOT NULL,
-    CONSTRAINT fk_pa_pago FOREIGN KEY (pago_id) REFERENCES pagos(id),
-    CONSTRAINT fk_pa_cargo FOREIGN KEY (cargo_id) REFERENCES cargos(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE PagoAplicaciones (
+    Id             BIGINT IDENTITY(1,1) PRIMARY KEY,
+    PagoId         BIGINT NOT NULL,
+    CargoId        BIGINT NOT NULL,
+    MontoAplicado  DECIMAL(14,2) NOT NULL,
+    CONSTRAINT FK_PA_Pago FOREIGN KEY (PagoId) REFERENCES Pagos(Id),
+    CONSTRAINT FK_PA_Cargo FOREIGN KEY (CargoId) REFERENCES Cargos(Id)
+);
+GO
 
 -- ----------------------------------------------------------------------------
 -- 8. INGRESOS EXTRAORDINARIOS Y TESORERÍA (fondo separado, no se prorratea)
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE ingresos_extraordinarios (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NOT NULL,
-    periodo_id      BIGINT UNSIGNED NULL,
-    fuente          VARCHAR(60) NOT NULL,   -- parqueadero, alquiler_espacio, evento, subsidio, otro
-    concepto        VARCHAR(150) NOT NULL,
-    monto           DECIMAL(14,2) NOT NULL,
-    fecha           DATE NOT NULL,
-    referencia      VARCHAR(120) NULL,
-    CONSTRAINT fk_ie_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    CONSTRAINT fk_ie_periodo FOREIGN KEY (periodo_id) REFERENCES periodos(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IngresosExtraordinarios (
+    Id             BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId   BIGINT NOT NULL,
+    PeriodoId      BIGINT NULL,
+    Fuente         NVARCHAR(60) NOT NULL,   -- parqueadero, alquiler_espacio, evento, subsidio, otro
+    Concepto       NVARCHAR(150) NOT NULL,
+    Monto          DECIMAL(14,2) NOT NULL,
+    Fecha          DATE NOT NULL,
+    Referencia     NVARCHAR(120) NULL,
+    CONSTRAINT FK_IE_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT FK_IE_Periodo FOREIGN KEY (PeriodoId) REFERENCES Periodos(Id)
+);
+GO
 
-CREATE TABLE cuentas_fondo (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NOT NULL,
-    nombre          VARCHAR(100) NOT NULL,     -- Caja General, Fondo de Reserva
-    tipo            VARCHAR(40) NOT NULL DEFAULT 'general',
-    saldo_actual    DECIMAL(14,2) NOT NULL DEFAULT 0,
-    CONSTRAINT fk_cf_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE CuentasFondo (
+    Id             BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId   BIGINT NOT NULL,
+    Nombre         NVARCHAR(100) NOT NULL,     -- Caja General, Fondo de Reserva
+    Tipo           NVARCHAR(40) NOT NULL DEFAULT 'general',
+    SaldoActual    DECIMAL(14,2) NOT NULL DEFAULT 0,
+    CONSTRAINT FK_CF_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id)
+);
+GO
 
 -- Ledger general: todo movimiento real de caja (pagos, ingresos extraordinarios, egresos por gasto pagado)
-CREATE TABLE movimientos_fondo (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NOT NULL,
-    cuenta_id       BIGINT UNSIGNED NOT NULL,
-    tipo            ENUM('ingreso','egreso') NOT NULL,
-    origen          VARCHAR(40) NOT NULL,       -- pago, ingreso_extraordinario, gasto, ajuste
-    origen_id       BIGINT UNSIGNED NULL,
-    monto           DECIMAL(14,2) NOT NULL,
-    fecha           DATE NOT NULL,
-    saldo_resultante DECIMAL(14,2) NOT NULL,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_mf_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    CONSTRAINT fk_mf_cuenta FOREIGN KEY (cuenta_id) REFERENCES cuentas_fondo(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE MovimientosFondo (
+    Id               BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId     BIGINT NOT NULL,
+    CuentaId         BIGINT NOT NULL,
+    Tipo             NVARCHAR(20) NOT NULL,       -- ingreso, egreso
+    Origen           NVARCHAR(40) NOT NULL,       -- pago, ingreso_extraordinario, gasto, ajuste
+    OrigenId         BIGINT NULL,
+    Monto            DECIMAL(14,2) NOT NULL,
+    Fecha            DATE NOT NULL,
+    SaldoResultante  DECIMAL(14,2) NOT NULL,
+    CreatedAt        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_MF_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT FK_MF_Cuenta FOREIGN KEY (CuentaId) REFERENCES CuentasFondo(Id),
+    CONSTRAINT CK_MF_Tipo CHECK (Tipo IN ('ingreso','egreso'))
+);
+GO
 
 -- ----------------------------------------------------------------------------
 -- 9. AUDITORÍA
 -- ----------------------------------------------------------------------------
 
-CREATE TABLE auditoria (
-    id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    agrupacion_id   BIGINT UNSIGNED NULL,
-    usuario_id      BIGINT UNSIGNED NULL,
-    tabla           VARCHAR(60) NOT NULL,
-    registro_id     BIGINT UNSIGNED NOT NULL,
-    accion          ENUM('crear','actualizar','eliminar') NOT NULL,
-    datos_antes     JSON NULL,
-    datos_despues   JSON NULL,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_aud_agrupacion FOREIGN KEY (agrupacion_id) REFERENCES agrupaciones(id),
-    CONSTRAINT fk_aud_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-SET FOREIGN_KEY_CHECKS = 1;
+CREATE TABLE Auditoria (
+    Id             BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId   BIGINT NULL,
+    UsuarioId      BIGINT NULL,
+    Tabla          NVARCHAR(60) NOT NULL,
+    RegistroId     BIGINT NOT NULL,
+    Accion         NVARCHAR(20) NOT NULL,
+    DatosAntes     NVARCHAR(MAX) NULL,
+    DatosDespues   NVARCHAR(MAX) NULL,
+    CreatedAt      DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Aud_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT FK_Aud_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuarios(Id),
+    CONSTRAINT CK_Aud_Accion CHECK (Accion IN ('crear','actualizar','eliminar')),
+    CONSTRAINT CK_Aud_DatosAntes CHECK (DatosAntes IS NULL OR ISJSON(DatosAntes) = 1),
+    CONSTRAINT CK_Aud_DatosDespues CHECK (DatosDespues IS NULL OR ISJSON(DatosDespues) = 1)
+);
+GO
 
 -- ----------------------------------------------------------------------------
 -- 10. SEEDS DE CATÁLOGOS BASE
 -- ----------------------------------------------------------------------------
 
-INSERT INTO tipos_agrupacion (codigo, nombre) VALUES
+INSERT INTO TiposAgrupacion (Codigo, Nombre) VALUES
     ('CONDOMINIO', 'Condominio residencial'),
     ('CENTRO_COMERCIAL', 'Centro comercial'),
     ('COWORKING', 'Espacio de coworking'),
     ('PARQUE_INDUSTRIAL', 'Parque industrial / zona franca');
+GO
 
-INSERT INTO metodos_prorrateo (codigo, nombre, descripcion) VALUES
+INSERT INTO MetodosProrrateo (Codigo, Nombre, Descripcion) VALUES
     ('COEFICIENTE', 'Por coeficiente/alícuota', 'Distribuye según el coeficiente vigente de cada unidad'),
     ('PARTES_IGUALES', 'Partes iguales', 'Divide el monto en partes iguales entre las unidades activas'),
     ('AREA', 'Por área (m2)', 'Distribuye proporcional al área de cada unidad'),
     ('CONSUMO', 'Por consumo', 'Distribuye según una lectura/consumo individual registrado'),
     ('DIRECTO', 'Directo a una unidad', 'Se asigna el 100% del gasto a una única unidad');
+GO
 
-INSERT INTO roles (codigo, nombre) VALUES
+INSERT INTO Roles (Codigo, Nombre) VALUES
     ('ADMIN_PLATAFORMA', 'Administrador de la plataforma'),
     ('ADMIN_AGRUPACION', 'Administrador de la agrupación'),
     ('PROPIETARIO', 'Propietario / arrendatario'),
     ('CONTADOR', 'Contador / auditor');
+GO
