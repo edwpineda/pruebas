@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 from anthropic import Anthropic
 
@@ -24,6 +25,10 @@ de Finanzas, postulate"), habla del tema en general, o no está relacionado.
 No respondas nada fuera del JSON."""
 
 
+def _strip_code_fence(raw: str) -> str:
+    return re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip())
+
+
 def classify(text: str, api_key: str) -> dict:
     client = Anthropic(api_key=api_key)
     try:
@@ -37,7 +42,7 @@ def classify(text: str, api_key: str) -> dict:
         logger.warning("Clasificación LLM falló: %s", exc)
         return {"es_busqueda_de_servicio": False, "categoria": "no_aplica", "confianza": 0.0, "motivo": "error_api"}
 
-    raw = response.content[0].text.strip()
+    raw = _strip_code_fence(response.content[0].text)
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
