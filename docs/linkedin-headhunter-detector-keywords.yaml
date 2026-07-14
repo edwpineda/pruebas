@@ -1,0 +1,143 @@
+# Keywords para el detector de leads (headhunter / consultoría RRHH) — foco LatAm.
+# Se usa en dos lugares del pipeline (ver docs/linkedin-headhunter-detector.md, sección 3):
+#   1. Conector D: para armar las queries a la API de Google/Bing.
+#   2. Etapa 1 (prefiltro): para descartar posts obviamente irrelevantes antes de mandarlos al LLM.
+#
+# Nota geográfica importante: Google no permite filtrar site:linkedin.com por país del autor.
+# El filtro de país/región se hace DESPUÉS, leyendo el "headline" o la ubicación del autor
+# (ej: "Gerente de RRHH en Bogotá, Colombia") una vez que ya tenemos el post — no en la query.
+# Por eso "paises_latam" abajo es informativo (para el clasificador y para reportes), no para
+# construir queries geo-acotadas.
+
+servicio:
+  es:
+    - headhunter
+    - head hunter
+    - cazatalentos
+    - caza talentos
+    - caza-talentos
+    - consultora de RRHH
+    - consultora de RH
+    - consultora de recursos humanos
+    - consultora de selección
+    - consultora de selección de personal
+    - firma de selección de personal
+    - firma de búsqueda de ejecutivos
+    - búsqueda ejecutiva
+    - búsqueda de ejecutivos
+    - executive search
+    - agencia de reclutamiento
+    - agencia de recruiting
+    - empresa de reclutamiento y selección
+    - outsourcing de RRHH
+    - tercerización de selección
+    - partner de selección
+    - reclutador especializado
+    - reclutadora ejecutiva
+    - servicio de headhunting
+  pt:
+    - headhunter
+    - caçador de talentos
+    - caça-talentos
+    - consultoria de RH
+    - consultoria de recursos humanos
+    - empresa de recrutamento e seleção
+    - busca de executivos
+    - recrutamento executivo
+    - agência de recrutamento
+
+intencion_demanda:
+  # Frases que indican que el autor está buscando CONTRATAR el servicio (no ofreciéndolo).
+  es:
+    - buscamos
+    - necesitamos
+    - requerimos
+    - estamos buscando recomendaciones de
+    - me recomiendan un buen
+    - alguien conoce un
+    - alguien me recomienda un
+    - queremos tercerizar la búsqueda
+    - buscamos partner para una búsqueda confidencial
+    - contratar servicios de reclutamiento
+    - apoyo externo para cubrir una vacante
+    - trabajan con alguna consultora de selección
+    - búsqueda confidencial
+    - quién nos puede ayudar a encontrar
+  pt:
+    - procuramos
+    - precisamos de apoio de
+    - alguém indica
+    - alguém recomenda
+    - queremos terceirizar a busca
+    - busca confidencial
+    - quem pode nos ajudar a encontrar
+
+calificadores_seniority:
+  # No son obligatorios, pero si aparecen junto con servicio+intención suben la confianza:
+  # una búsqueda de headhunter casi siempre es para un puesto senior/confidencial.
+  es: [gerente general, director, directora, gerente de, vicepresidente, posición confidencial, alta gerencia, C-level]
+  pt: [diretor, diretora, gerente geral, vice-presidente, cargo confidencial, alta gerência]
+
+exclusiones_oferta:
+  # Si el post tiene esto, casi siempre es alguien OFRECIENDO el servicio (ruido) o un job posting común.
+  es:
+    - somos una consultora
+    - ofrecemos servicios de
+    - ayudamos a empresas a encontrar
+    - buscas trabajo
+    - aplica ahora
+    - estamos contratando
+    - vacante disponible
+    - únete a nuestro equipo
+    - postulate
+  pt:
+    - somos uma consultoria
+    - oferecemos serviços de
+    - ajudamos empresas a encontrar
+    - você busca emprego
+    - candidate-se
+    - estamos contratando
+    - vaga disponível
+  en:
+    - we are hiring
+    - apply now
+    - join our team
+
+paises_latam:
+  # Informativo: se usa para clasificar/reportar el país una vez identificado el post, y para
+  # priorizar en qué idioma escribir el resumen de la alerta. No se usa para construir la query.
+  - pais: México
+    jerga: [cazatalentos, headhunter, reclutador]
+  - pais: Colombia
+    jerga: [cazatalentos, "firma de selección", "consultora de RRHH"]
+  - pais: Argentina
+    jerga: ["búsqueda de personal", "consultora de RRHH", search]
+  - pais: Chile
+    jerga: ["empresa de selección", "consultora de RRHH", headhunter]
+  - pais: Perú
+    jerga: [cazatalentos, "consultora de selección"]
+  - pais: Ecuador
+    jerga: [cazatalentos, "consultora de RRHH"]
+  - pais: Uruguay
+    jerga: ["búsqueda de personal", "consultora de RRHH"]
+  - pais: Centroamérica
+    jerga: [cazatalentos, headhunter, "consultora de RRHH"]
+  - pais: Brasil
+    idioma: pt
+    jerga: [headhunter, "caçador de talentos", "consultoria de RH"]
+
+# Queries curadas para el conector D (Google CSE). Se mantiene la lista corta a propósito:
+# con el tier gratuito (100 queries/día) y un poleo cada 2-3hs (8-12 corridas/día), conviene
+# priorizar precisión sobre exhaustividad en vez de generar el producto cartesiano completo
+# de intencion x servicio (daría cientos de combinaciones, fuera de presupuesto).
+queries_prioritarias:
+  - site:linkedin.com/posts "buscamos" ("headhunter" OR "cazatalentos")
+  - site:linkedin.com/posts "necesitamos" ("consultora de RRHH" OR "consultora de RH")
+  - site:linkedin.com/posts "me recomiendan" ("headhunter" OR "consultora de selección")
+  - site:linkedin.com/posts "búsqueda confidencial" ("headhunter" OR "executive search")
+  - site:linkedin.com/posts "alguien conoce" "cazatalentos"
+  - site:linkedin.com/posts "queremos tercerizar" "selección"
+  - site:linkedin.com/posts "trabajan con alguna consultora"
+  - site:linkedin.com/posts "buscamos partner" "búsqueda"
+  - site:linkedin.com/posts "procuramos" "headhunter"
+  - site:linkedin.com/posts "alguém indica" "consultoria de RH"

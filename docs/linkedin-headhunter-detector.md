@@ -134,15 +134,16 @@ Esto es exactamente el tipo de matiz donde un filtro de keywords se queda corto 
 Diseño en dos etapas para no gastar de más:
 
 **Etapa 1 — prefiltro barato (regex/keywords)**, corre sobre el 100% de los posts, solo para
-descartar lo obviamente irrelevante:
+descartar lo obviamente irrelevante. El set completo de keywords (foco LatAm: español + portugués
+de Brasil), con términos de servicio, frases de intención de demanda, calificadores de seniority y
+exclusiones de oferta, está en
+[`docs/linkedin-headhunter-detector-keywords.yaml`](./linkedin-headhunter-detector-keywords.yaml).
+Ese mismo archivo trae las 10 queries curadas para el conector D (sección 3.1).
 
-```
-ES: headhunter, head hunter, executive search, consultora de RRHH, consultora de RH,
-    reclutamiento, selección de personal, tercerizar selección, búsqueda ejecutiva,
-    buscamos.*(headhunter|consultora|recruiter), necesitamos.*(headhunter|RRHH)
-EN: headhunter, executive search, HR consulting, recruiting agency, talent acquisition partner,
-    looking for a recruiter, need a headhunter
-```
+Nota sobre geografía: Google no permite acotar `site:linkedin.com` por país del autor, así que el
+filtro de "¿es LatAm?" no va en la query — se hace después, leyendo el headline/ubicación del autor
+una vez que ya se obtuvo el post (ej: "Gerente de RRHH en Bogotá, Colombia" → Colombia). El campo
+`paises_latam` del YAML es para esa clasificación posterior, no para la búsqueda.
 
 **Etapa 2 — clasificación por LLM**, corre solo sobre lo que pasó la etapa 1 (mucho menos volumen,
 así el costo de tokens es bajo). Ejemplo de prompt (usando Claude, modelo económico tipo Haiku
