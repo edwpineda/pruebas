@@ -7,6 +7,12 @@ del diseño (`docs/arquitectura.md`, `docs/erd.md`, mockup del builder visual).
 No usa migraciones de EF Core: la fuente de verdad del esquema es `database/schema.sql`. El
 `DbContext` (`Data/AppDbContext.cs`) mapea explícitamente a esas tablas ya existentes.
 
+> **Nota sobre la versión de .NET**: el proyecto apunta a `net10.0` (la versión actual). Todavía
+> no confirmamos si el Windows Hosting de Donweb/Ferozo tiene el Hosting Bundle de .NET 10
+> instalado (es muy reciente) — ver `docs/despliegue-donweb.md`, sección 1. Si al momento de
+> publicar resulta que el hosting solo soporta .NET 8 (LTS), retroceder es un cambio de una sola
+> línea: `<TargetFramework>` en `CostAllocation.Web.csproj`, de `net10.0` a `net8.0`.
+
 ## 1. Revisar si tenés lo necesario en tu PC
 
 Abrí una terminal (PowerShell en Windows) y corré:
@@ -15,9 +21,9 @@ Abrí una terminal (PowerShell en Windows) y corré:
 dotnet --version
 ```
 
-- Si te devuelve un número de versión (ej. `8.0.xxx`) → ya tenés el SDK, pasá al paso 2.
+- Si te devuelve un número de versión (ej. `10.0.xxx`) → ya tenés el SDK, pasá al paso 2.
 - Si dice "no se reconoce el comando" o similar → no lo tenés instalado. Instalá el **SDK de
-  .NET 8** desde https://dotnet.microsoft.com/download (no alcanza con el "Runtime", necesitás
+  .NET** desde https://dotnet.microsoft.com/download (no alcanza con el "Runtime", necesitás
   el "SDK" para poder compilar). En Windows, instalar **Visual Studio Community** (gratis) desde
   https://visualstudio.microsoft.com/ con la carga de trabajo "Desarrollo de ASP.NET y web" te
   instala el SDK automáticamente y te da un editor con debugger — es el camino más cómodo si no
