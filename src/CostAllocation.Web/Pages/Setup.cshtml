@@ -1,0 +1,29 @@
+@page
+@model CostAllocation.Web.Pages.SetupModel
+@{
+    ViewData["Title"] = "Configuración inicial";
+}
+
+<div class="auth-card">
+    <h1>Configuración inicial</h1>
+
+    @if (Model.YaHayUsuarios)
+    {
+        <p>Ya existe al menos un usuario. <a asp-page="Login">Iniciar sesión</a></p>
+    }
+    else
+    {
+        <p>Creá el primer usuario administrador de la plataforma.</p>
+        @if (Model.Error is not null)
+        {
+            <p class="error">@Model.Error</p>
+        }
+        <form method="post">
+            <label>Correo electrónico</label>
+            <input asp-for="Email" type="email" required />
+            <label>Contraseña</label>
+            <input asp-for="Password" type="password" required />
+            <button type="submit">Crear administrador</button>
+        </form>
+    }
+</div>

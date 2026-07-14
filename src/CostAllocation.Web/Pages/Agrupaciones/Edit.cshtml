@@ -1,0 +1,34 @@
+@page "{id:long}"
+@model CostAllocation.Web.Pages.Agrupaciones.EditModel
+@{
+    ViewData["Title"] = "Editar agrupación";
+}
+
+<h1>Editar agrupación</h1>
+
+<form method="post">
+    <input type="hidden" asp-for="Agrupacion.Id" />
+
+    <label>Nombre</label>
+    <input asp-for="Agrupacion.Nombre" required />
+
+    <label>Tipo de agrupación</label>
+    <select asp-for="Agrupacion.TipoAgrupacionId" asp-items="@(new SelectList(Model.Tipos, "Id", "Nombre"))"></select>
+
+    <label>Moneda</label>
+    <input asp-for="Agrupacion.Moneda" />
+
+    <label>Día de corte de facturación</label>
+    <input asp-for="Agrupacion.DiaCorteFacturacion" type="number" min="1" max="28" />
+
+    <label>Tasa de interés de mora (% mensual)</label>
+    <input asp-for="Agrupacion.TasaInteresMora" type="number" step="0.01" />
+
+    <label class="checkbox-row">
+        <input asp-for="Agrupacion.Activo" type="checkbox" />
+        Activa
+    </label>
+
+    <button type="submit">Guardar</button>
+    <a asp-page="Index">Cancelar</a>
+</form>

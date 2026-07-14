@@ -1,0 +1,28 @@
+@page
+@model CostAllocation.Web.Pages.Agrupaciones.CreateModel
+@{
+    ViewData["Title"] = "Nueva agrupación";
+}
+
+<h1>Nueva agrupación</h1>
+
+<form method="post">
+    <label>Nombre</label>
+    <input asp-for="Agrupacion.Nombre" required />
+    <span class="error" asp-validation-for="Agrupacion.Nombre"></span>
+
+    <label>Tipo de agrupación</label>
+    <select asp-for="Agrupacion.TipoAgrupacionId" asp-items="@(new SelectList(Model.Tipos, "Id", "Nombre"))"></select>
+
+    <label>Moneda</label>
+    <input asp-for="Agrupacion.Moneda" value="COP" />
+
+    <label>Día de corte de facturación</label>
+    <input asp-for="Agrupacion.DiaCorteFacturacion" type="number" min="1" max="28" value="1" />
+
+    <label>Tasa de interés de mora (% mensual)</label>
+    <input asp-for="Agrupacion.TasaInteresMora" type="number" step="0.01" value="0" />
+
+    <button type="submit">Crear</button>
+    <a asp-page="Index">Cancelar</a>
+</form>

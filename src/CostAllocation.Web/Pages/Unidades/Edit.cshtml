@@ -1,0 +1,36 @@
+@page "{id:long}"
+@model CostAllocation.Web.Pages.Unidades.EditModel
+@{
+    ViewData["Title"] = "Editar unidad";
+}
+
+<h1>Editar unidad</h1>
+
+<form method="post">
+    <input type="hidden" asp-for="Unidad.Id" />
+    <input type="hidden" asp-for="Unidad.AgrupacionId" />
+
+    <label>Código</label>
+    <input asp-for="Unidad.Codigo" required />
+
+    <label>Tipo de unidad</label>
+    <select asp-for="Unidad.TipoUnidad">
+        <option value="Residencial">Residencial</option>
+        <option value="Comercial">Comercial</option>
+        <option value="Bodega">Bodega</option>
+        <option value="Oficina">Oficina</option>
+        <option value="Lote">Lote</option>
+    </select>
+
+    <label>Área (m²)</label>
+    <input asp-for="Unidad.AreaM2" type="number" step="0.01" />
+
+    <label>Estado</label>
+    <select asp-for="Unidad.Estado">
+        <option value="activo">Activo</option>
+        <option value="inactivo">Inactivo</option>
+    </select>
+
+    <button type="submit">Guardar</button>
+    <a asp-page="Index" asp-route-agrupacionId="@Unidad.AgrupacionId">Cancelar</a>
+</form>

@@ -1,0 +1,36 @@
+@page
+@model CostAllocation.Web.Pages.Unidades.IndexModel
+@{
+    ViewData["Title"] = "Unidades";
+}
+
+<div class="page-header">
+    <h1>Unidades · @Model.Agrupacion?.Nombre</h1>
+    <a class="btn" asp-page="Create" asp-route-agrupacionId="@Model.AgrupacionId">+ Nueva unidad</a>
+</div>
+<p><a asp-page="/Agrupaciones/Index">&larr; Volver a Agrupaciones</a></p>
+
+@if (!Model.Unidades.Any())
+{
+    <p class="empty">Esta agrupación todavía no tiene unidades.</p>
+}
+else
+{
+    <table class="data-table">
+        <thead>
+            <tr><th>Código</th><th>Tipo</th><th>Área (m²)</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model.Unidades)
+            {
+                <tr>
+                    <td>@u.Codigo</td>
+                    <td>@u.TipoUnidad</td>
+                    <td>@u.AreaM2</td>
+                    <td>@u.Estado</td>
+                    <td><a asp-page="Edit" asp-route-id="@u.Id">Editar</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

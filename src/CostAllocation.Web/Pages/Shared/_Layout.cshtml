@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · Prorrateo</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header class="topbar">
+        <span class="brand">◇ Prorrateo</span>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <nav>
+                <a asp-page="/Agrupaciones/Index">Agrupaciones</a>
+                <span class="user-email">@User.Identity.Name</span>
+                <form method="post" asp-page="/Logout" style="display:inline">
+                    <button type="submit" class="link-btn">Salir</button>
+                </form>
+            </nav>
+        }
+    </header>
+    <main class="content">
+        @RenderBody()
+    </main>
+</body>
+</html>
