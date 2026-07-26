@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configurador de Servicios y Planes</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-logo">🧩</span>
+      <span class="brand-name">Configurador de Servicios</span>
+      <span class="mock-badge" title="Los datos se guardan en el navegador (localStorage) y se pueden exportar/importar como archivo JSON. Más adelante esto se reemplaza por una API + base de datos.">MOCKUP</span>
+    </div>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="editor">Configurar</button>
+      <button class="tab-btn" data-tab="preview">Vista previa (Inicio)</button>
+    </nav>
+
+    <div class="topbar-actions">
+      <span id="saveStatus" class="save-status">Guardado</span>
+      <button id="btnExport" class="btn-ghost" title="Descargar la configuración como archivo .json">⬇ Exportar</button>
+      <label for="importFile" class="btn-ghost" title="Cargar una configuración desde un archivo .json">⬆ Importar</label>
+      <input type="file" id="importFile" accept="application/json" hidden>
+      <div id="authArea" class="auth-area"></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== EDITOR (drag & drop) ===================== -->
+    <section id="editorView" class="view active">
+      <aside class="sidebar">
+        <h2>Servicios</h2>
+        <ul id="servicioList" class="servicio-list"></ul>
+        <button id="btnAddServicio" class="btn-add-servicio">+ Nuevo servicio</button>
+      </aside>
+
+      <div class="board-wrap">
+        <div class="board-header" id="boardHeader">
+          <!-- se llena por JS -->
+        </div>
+        <div class="board" id="board"></div>
+      </div>
+    </section>
+
+    <!-- ===================== VISTA PREVIA (home / público) ===================== -->
+    <section id="previewView" class="view">
+      <div id="previewContent" class="preview-content"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    Prototipo — la configuración se guarda en <code>localStorage</code> del navegador y se puede exportar/importar
+    como archivo <code>.json</code> plano. En producción esto se reemplaza por una API contra base de datos.
+  </footer>
+</div>
+
+<!-- ===================== MODAL: LOGIN ===================== -->
+<div id="loginModal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" data-close="loginModal">✕</button>
+    <h3>Iniciar sesión</h3>
+    <p class="modal-sub">Necesitas iniciar sesión para continuar con el pago.</p>
+    <form id="loginForm">
+      <label>Correo electrónico
+        <input type="email" id="loginEmail" required placeholder="tú@correo.com">
+      </label>
+      <label>Contraseña
+        <input type="password" id="loginPassword" required placeholder="••••••••">
+      </label>
+      <div class="modal-actions">
+        <button type="button" id="btnDemoLogin" class="btn-ghost">Usar cuenta demo</button>
+        <button type="submit" class="btn-primary">Entrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: PAGO ===================== -->
+<div id="payModal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" data-close="payModal">✕</button>
+    <div id="payModalBody"></div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
