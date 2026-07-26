@@ -4,6 +4,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Habilita compilar componentes .razor (Blazor Server) embebidos como "isla interactiva"
+         dentro de esta app Razor Pages/MVC — ver Components/PlanesBuilder.razor. -->
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,45 @@
+@page
+@model CostAllocation.Web.Pages.Servicios.IndexModel
+@{
+    ViewData["Title"] = "Servicios";
+}
+
+<div class="page-header">
+    <h1>Servicios opcionales · @Model.Agrupacion?.Nombre</h1>
+    <form method="post" asp-page-handler="Nuevo">
+        <input type="hidden" name="agrupacionId" value="@Model.AgrupacionId" />
+        <button type="submit" class="btn">+ Nuevo servicio</button>
+    </form>
+</div>
+<p><a asp-page="/Agrupaciones/Index">&larr; Volver a Agrupaciones</a></p>
+
+@if (!Model.Servicios.Any())
+{
+    <p class="empty">Esta agrupación todavía no ofrece servicios opcionales a sus unidades.</p>
+}
+else
+{
+    <table class="data-table">
+        <thead>
+            <tr><th>Servicio</th><th>Planes</th><th></th></tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model.Servicios)
+            {
+                <tr>
+                    <td>@s.Icono @s.Nombre</td>
+                    <td>@string.Join(" · ", s.Planes.OrderBy(p => p.Orden).Select(p => p.Nombre))</td>
+                    <td>
+                        <a asp-page="Builder" asp-route-servicioId="@s.Id" asp-route-agrupacionId="@Model.AgrupacionId">Configurar</a> ·
+                        <a asp-page="Suscribir" asp-route-agrupacionId="@Model.AgrupacionId">Vista pública</a> ·
+                        <form method="post" asp-page-handler="Eliminar" style="display:inline">
+                            <input type="hidden" name="id" value="@s.Id" />
+                            <input type="hidden" name="agrupacionId" value="@Model.AgrupacionId" />
+                            <button type="submit" class="link-btn">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

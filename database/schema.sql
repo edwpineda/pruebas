@@ -76,6 +76,70 @@ CREATE INDEX IX_UnidadCoeficientes_Vigencia ON UnidadCoeficientes (UnidadId, Vig
 GO
 
 -- ----------------------------------------------------------------------------
+-- 2B. SERVICIOS OPCIONALES Y PLANES (ofrecidos por la Agrupación a sus Unidades)
+-- ----------------------------------------------------------------------------
+-- Ej: una Agrupación (condominio) ofrece TV por cable, servicio de comida u hospedaje
+-- como servicios adicionales pagos, cada uno con N planes (Básico/Estándar/Premium).
+-- Un plan superior puede heredar en cascada las características del plan con el Orden
+-- inmediato anterior (HeredaDeInferior), además de sumar las propias.
+
+CREATE TABLE Servicios (
+    Id            BIGINT IDENTITY(1,1) PRIMARY KEY,
+    AgrupacionId  BIGINT NOT NULL,
+    Nombre        NVARCHAR(100) NOT NULL,     -- "TV por cable", "Servicio de comida", "Hospedaje"
+    Icono         NVARCHAR(20) NULL,          -- emoji identificador, ej. "📺"
+    Orden         INT NOT NULL DEFAULT 0,
+    Activo        BIT NOT NULL DEFAULT 1,
+    CreatedAt     DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt     DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_Servicios_Agrupacion FOREIGN KEY (AgrupacionId) REFERENCES Agrupaciones(Id),
+    CONSTRAINT UQ_Servicios_Nombre UNIQUE (AgrupacionId, Nombre)
+);
+GO
+
+CREATE TABLE ServicioPlanes (
+    Id                BIGINT IDENTITY(1,1) PRIMARY KEY,
+    ServicioId        BIGINT NOT NULL,
+    Nombre            NVARCHAR(80) NOT NULL,      -- "Básico", "Estándar", "Premium"
+    Precio            DECIMAL(14,2) NOT NULL DEFAULT 0,
+    HeredaDeInferior  BIT NOT NULL DEFAULT 0,      -- incluye las características del plan con Orden-1
+    Orden             INT NOT NULL DEFAULT 0,      -- jerarquía: 0 = plan más bajo
+    CreatedAt         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_ServicioPlanes_Servicio FOREIGN KEY (ServicioId) REFERENCES Servicios(Id)
+);
+GO
+CREATE INDEX IX_ServicioPlanes_Servicio_Orden ON ServicioPlanes (ServicioId, Orden);
+GO
+
+CREATE TABLE ServicioPlanCaracteristicas (
+    Id       BIGINT IDENTITY(1,1) PRIMARY KEY,
+    PlanId   BIGINT NOT NULL,
+    Texto    NVARCHAR(200) NOT NULL,
+    Orden    INT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_SPC_Plan FOREIGN KEY (PlanId) REFERENCES ServicioPlanes(Id)
+);
+GO
+CREATE INDEX IX_SPC_Plan_Orden ON ServicioPlanCaracteristicas (PlanId, Orden);
+GO
+
+-- Suscripción de una Unidad a un plan de servicio opcional. El cobro real se integra al
+-- ciclo de Cargos (sección 7) cuando se genere el Cargo del periodo; todavía no está
+-- automatizado (ver "Qué falta" en el README del proyecto).
+CREATE TABLE UnidadServicioPlanes (
+    Id            BIGINT IDENTITY(1,1) PRIMARY KEY,
+    UnidadId      BIGINT NOT NULL,
+    PlanId        BIGINT NOT NULL,
+    FechaDesde    DATE NOT NULL,
+    FechaHasta    DATE NULL,             -- NULL = suscripción activa
+    CONSTRAINT FK_USP_Unidad FOREIGN KEY (UnidadId) REFERENCES Unidades(Id),
+    CONSTRAINT FK_USP_Plan FOREIGN KEY (PlanId) REFERENCES ServicioPlanes(Id)
+);
+GO
+CREATE INDEX IX_USP_Unidad_Vigencia ON UnidadServicioPlanes (UnidadId, FechaDesde, FechaHasta);
+GO
+
+-- ----------------------------------------------------------------------------
 -- 3. PERSONAS / TERCEROS
 -- ----------------------------------------------------------------------------
 

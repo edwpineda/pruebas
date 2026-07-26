@@ -1,0 +1,70 @@
+@page
+@model CostAllocation.Web.Pages.Servicios.SuscribirModel
+@{
+    ViewData["Title"] = "Servicios · " + (Model.Agrupacion?.Nombre ?? "");
+    ViewData["Wide"] = true;
+}
+
+<p><a asp-page="Index" asp-route-agrupacionId="@Model.AgrupacionId">&larr; Volver a Servicios</a></p>
+<h1>Servicios de @Model.Agrupacion?.Nombre</h1>
+
+@if (!string.IsNullOrEmpty(Model.Ok))
+{
+    <p class="ok-banner">✅ Suscripción confirmada al plan "@Model.Ok".</p>
+}
+
+@if (!Model.Servicios.Any())
+{
+    <p class="empty">Todavía no hay servicios opcionales configurados para esta agrupación.</p>
+}
+
+@foreach (var servicio in Model.Servicios)
+{
+    var planes = servicio.Planes.OrderBy(p => p.Orden).ToList();
+    <section class="preview-servicio">
+        <h2>@servicio.Icono @servicio.Nombre</h2>
+        <div class="preview-plans">
+            @for (var i = 0; i < planes.Count; i++)
+            {
+                var plan = planes[i];
+                <div class="preview-plan-card @(i == planes.Count - 1 && planes.Count > 1 ? "featured" : "")">
+                    <h3>@plan.Nombre</h3>
+                    <div class="preview-price">$@plan.Precio.ToString("N2") <small>/mes</small></div>
+                    <ul class="preview-feature-list">
+                        @if (i > 0 && plan.HeredaDeInferior)
+                        {
+                            <li class="includes-label">Incluye todo lo de "@planes[i - 1].Nombre", además:</li>
+                            @foreach (var f in Model.GetInherited(planes, i - 1))
+                            {
+                                <li class="inherited">@f.Texto</li>
+                            }
+                        }
+                        @foreach (var f in plan.Caracteristicas.OrderBy(c => c.Orden))
+                        {
+                            <li>@f.Texto</li>
+                        }
+                    </ul>
+
+                    @if (Model.Unidades.Any())
+                    {
+                        <form method="post" asp-page-handler="Suscribir">
+                            <input type="hidden" name="agrupacionId" value="@Model.AgrupacionId" />
+                            <input type="hidden" name="planId" value="@plan.Id" />
+                            <select name="unidadId" required>
+                                @foreach (var u in Model.Unidades)
+                                {
+                                    <option value="@u.Id">@u.Codigo</option>
+                                }
+                            </select>
+                            <button type="submit" class="btn">Pagar / Suscribirme</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="empty">Esta agrupación todavía no tiene unidades cargadas.</p>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+}

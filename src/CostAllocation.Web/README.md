@@ -67,10 +67,24 @@ Te va a mostrar una URL tipo `https://localhost:5001`. Abrila en el navegador:
    administrador (correo + contraseña).
 2. Iniciá sesión en `/Login`.
 3. Te lleva a **Agrupaciones** — creá una, entrá a "Unidades" y cargá algunas.
+4. Desde la fila de la agrupación, entrá a **Servicios** para configurar servicios opcionales
+   (TV, comida, hospedaje, etc.) que la agrupación ofrece a sus unidades:
+   - **Configurar**: builder drag & drop (Blazor Server, isla interactiva embebida en la Razor
+     Page) con columnas por plan — arrastrá la columna completa por el ícono ⠿ del encabezado
+     para reordenar planes, y arrastrá las tarjetas de características (⠿) para reordenarlas o
+     moverlas a otro plan. Cada plan (salvo el primero) tiene un checkbox "Incluye lo de
+     `<plan anterior>`" que hereda en cascada sus características. Todo se persiste de
+     inmediato contra la base de datos.
+   - **Vista pública**: la página que vería un propietario, con un botón **Pagar/Suscribirme**
+     por plan. Es de acceso público (sin `[Authorize]`), pero pagar exige sesión iniciada: si no
+     hay sesión, redirige a `/Login` y vuelve automáticamente a esta página al autenticarse
+     (`ReturnUrl`). Al suscribirse se crea un registro en `UnidadServicioPlanes`.
 
 ## 5. Qué falta (fuera del alcance de este MVP)
 
 Esto es la porción mínima para validar el pipeline completo. Lo que sigue el diseño pero
 todavía no está construido: Conceptos de gasto, Gastos, el motor de prorrateo (Strategy),
-Cargos/Pagos, el componente Blazor del builder visual, y el resto de los roles/permisos. Se
-agrega en la siguiente etapa, ya con el pipeline de publicación probado.
+Cargos/Pagos, y el resto de los roles/permisos. La suscripción de una Unidad a un
+`ServicioPlan` (sección 4, punto 4) todavía no se refleja como cargo real: falta el paso que
+la convierta en un `CargoDetalle` del período — se agrega junto con el resto del motor de
+Cargos/Pagos, ya con el pipeline de publicación probado.

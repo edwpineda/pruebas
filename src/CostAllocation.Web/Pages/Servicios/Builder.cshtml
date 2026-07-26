@@ -1,0 +1,11 @@
+@page
+@model CostAllocation.Web.Pages.Servicios.BuilderModel
+@{
+    ViewData["Title"] = "Configurar " + (Model.Servicio?.Nombre ?? "servicio");
+    ViewData["Wide"] = true;
+}
+
+<p><a asp-page="Index" asp-route-agrupacionId="@Model.AgrupacionId">&larr; Volver a Servicios</a></p>
+
+<component type="typeof(CostAllocation.Web.Components.PlanesBuilder)" render-mode="ServerPrerendered"
+           param-ServicioId="@Model.ServicioId" />

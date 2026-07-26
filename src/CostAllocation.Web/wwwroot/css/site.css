@@ -59,3 +59,119 @@ button:hover, .btn:hover { filter: brightness(1.05); }
 .data-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); background: var(--bg); }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table a { color: var(--accent); text-decoration: none; }
+
+.content-wide { max-width: none; padding: 24px 28px; }
+
+.ok-banner {
+  background: #e6f6ea; border: 1px solid #b7e4c2; color: #1c6b34;
+  padding: 10px 14px; border-radius: 8px; font-size: 13.5px; margin-bottom: 16px;
+}
+
+#blazor-error-ui {
+  display: none;
+  background: #fff3d6; border-top: 1px solid #f2d38a;
+  bottom: 0; box-shadow: 0 -1px 4px rgba(0,0,0,.1); left: 0; padding: 10px 20px;
+  position: fixed; width: 100%; font-size: 13px;
+}
+#blazor-error-ui .dismiss { cursor: pointer; float: right; }
+
+/* ---------------- Builder de Servicios/Planes (isla Blazor Server) ---------------- */
+.pb-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.pb-icon-btn {
+  font-size: 24px; border: 1px solid transparent; background: transparent;
+  border-radius: 6px; padding: 2px 6px; cursor: pointer; position: relative;
+}
+.pb-icon-btn:hover { background: var(--bg); border-color: var(--border); }
+.pb-title-input {
+  font-size: 20px; font-weight: 700; border: 1px solid transparent; border-radius: 6px;
+  padding: 4px 8px; flex: 1; min-width: 0; background: transparent; color: var(--ink);
+}
+.pb-title-input:hover, .pb-title-input:focus { border-color: var(--border); background: var(--surface); outline: none; }
+.pb-save-status { font-size: 12px; color: var(--ink-soft); }
+
+.pb-emoji-picker {
+  position: absolute; top: 110%; left: 0; background: var(--surface); border: 1px solid var(--border);
+  box-shadow: 0 4px 14px rgba(0,0,0,.12); border-radius: 8px; padding: 8px;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; z-index: 30; width: 220px;
+}
+.pb-emoji-picker button { border: none; background: transparent; font-size: 18px; cursor: pointer; border-radius: 4px; padding: 4px; }
+.pb-emoji-picker button:hover { background: var(--bg); }
+
+.pb-board { display: flex; align-items: flex-start; gap: 16px; overflow-x: auto; padding-bottom: 20px; }
+
+.pb-column {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  width: 260px; flex-shrink: 0; display: flex; flex-direction: column; transition: outline .1s ease;
+}
+.pb-column.pb-drag-over { outline: 2px dashed var(--accent); outline-offset: -2px; }
+
+.pb-column-header { display: flex; align-items: center; gap: 6px; padding: 10px 10px 4px; }
+.pb-drag-handle { color: var(--ink-soft); cursor: grab; font-size: 14px; }
+.pb-plan-name {
+  flex: 1; font-weight: 700; font-size: 15px; padding: 3px 6px; border-radius: 4px;
+  border: 1px solid transparent; min-width: 0; background: transparent; color: var(--ink); font-family: inherit;
+}
+.pb-plan-name:hover, .pb-plan-name:focus { background: var(--surface); border-color: var(--border); outline: none; }
+.pb-del {
+  border: none; background: transparent; color: var(--ink-soft); cursor: pointer;
+  font-size: 12px; border-radius: 4px; padding: 3px 5px;
+}
+.pb-del:hover { background: #fbe4e4; color: #b8382f; }
+
+.pb-price-row { display: flex; align-items: baseline; gap: 4px; padding: 0 12px 6px; font-size: 13px; color: var(--ink-soft); }
+.pb-price-input {
+  font-size: 20px; font-weight: 700; border: 1px solid transparent; border-radius: 4px;
+  width: 90px; padding: 2px 4px; background: transparent; color: var(--ink); font-family: inherit;
+}
+.pb-price-input:hover, .pb-price-input:focus { background: var(--surface); border-color: var(--border); outline: none; }
+
+.pb-inherit-row { display: flex; align-items: center; gap: 6px; padding: 2px 12px 8px; font-size: 12px; color: var(--ink-soft); }
+.pb-inherit-row.muted { padding-left: 12px; }
+
+.pb-inherit-note { font-size: 11px; color: var(--accent); padding: 0 12px 4px; }
+
+.pb-features { list-style: none; margin: 0; padding: 4px 8px 8px; min-height: 30px; display: flex; flex-direction: column; gap: 6px; }
+
+.pb-feature {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 7px 8px;
+  font-size: 13px; display: flex; align-items: flex-start; gap: 6px;
+}
+.pb-feature.pb-inherited { background: var(--bg); border-style: dashed; color: var(--ink-soft); }
+.pb-dot { color: var(--ink-soft); font-size: 12px; cursor: grab; padding-top: 1px; }
+.pb-feature-text {
+  flex: 1; min-width: 0; border: none; background: transparent; font: inherit; color: var(--ink); padding: 0;
+}
+.pb-feature-text:focus { outline: none; }
+.pb-feature .pb-del { opacity: .7; }
+
+.pb-add-feature {
+  margin: 0 8px 10px; border: none; background: transparent; color: var(--ink-soft);
+  font-size: 13px; text-align: left; padding: 6px 4px; border-radius: 4px; cursor: pointer; font-family: inherit;
+}
+.pb-add-feature:hover { background: var(--surface); color: var(--ink); }
+
+.pb-add-plan {
+  flex-shrink: 0; width: 220px; border: 1px dashed var(--border); border-radius: 10px; background: transparent;
+  color: var(--ink-soft); font-size: 14px; cursor: pointer; padding: 14px; align-self: flex-start; font-family: inherit;
+}
+.pb-add-plan:hover { background: var(--bg); color: var(--ink); }
+
+/* ---------------- Vista pública de Servicios (Suscribir.cshtml) ---------------- */
+.preview-servicio { max-width: 1000px; margin: 0 auto 48px; }
+.preview-servicio h2 { margin: 0 0 16px; }
+.preview-plans { display: flex; gap: 20px; flex-wrap: wrap; }
+.preview-plan-card {
+  flex: 1; min-width: 220px; border: 1px solid var(--border); border-radius: 12px; padding: 22px;
+  background: var(--surface); display: flex; flex-direction: column;
+}
+.preview-plan-card.featured { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(47,95,209,.12); }
+.preview-plan-card h3 { margin: 0 0 6px; font-size: 17px; }
+.preview-price { font-size: 28px; font-weight: 800; margin: 4px 0 14px; }
+.preview-price small { font-size: 13px; font-weight: 500; color: var(--ink-soft); }
+.preview-feature-list { list-style: none; padding: 0; margin: 0 0 18px; flex: 1; }
+.preview-feature-list li { padding: 4px 0; font-size: 13.5px; }
+.preview-feature-list li:not(.includes-label)::before { content: "✓ "; color: #2f9e44; font-weight: 700; }
+.preview-feature-list li.inherited { color: var(--ink-soft); }
+.preview-feature-list li.includes-label { color: var(--accent); font-weight: 600; font-size: 12px; }
+.preview-plan-card form { flex-direction: row; gap: 8px; max-width: none; }
+.preview-plan-card select { flex: 1; }

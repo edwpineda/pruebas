@@ -18,4 +18,5 @@ public class Agrupacion
     public DateTime? DeletedAt { get; set; }
 
     public ICollection<Unidad> Unidades { get; set; } = new List<Unidad>();
+    public ICollection<Servicio> Servicios { get; set; } = new List<Servicio>();
 }

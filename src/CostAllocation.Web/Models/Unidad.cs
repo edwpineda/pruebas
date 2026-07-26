@@ -14,4 +14,5 @@ public class Unidad
     public DateTime? DeletedAt { get; set; }
 
     public ICollection<UnidadCoeficiente> Coeficientes { get; set; } = new List<UnidadCoeficiente>();
+    public ICollection<UnidadServicioPlan> Suscripciones { get; set; } = new List<UnidadServicioPlan>();
 }

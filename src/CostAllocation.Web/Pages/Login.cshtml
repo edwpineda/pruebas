@@ -11,6 +11,7 @@
         <p class="error">@Model.Error</p>
     }
     <form method="post">
+        <input type="hidden" asp-for="ReturnUrl" />
         <label>Correo electrónico</label>
         <input asp-for="Email" type="email" required />
         <label>Contraseña</label>

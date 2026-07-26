@@ -21,6 +21,9 @@ public class LoginModel : PageModel
     [BindProperty]
     public string Password { get; set; } = "";
 
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
+
     public string? Error { get; set; }
 
     public void OnGet() { }
@@ -54,6 +57,10 @@ public class LoginModel : PageModel
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
 
+        if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+        {
+            return LocalRedirect(ReturnUrl);
+        }
         return RedirectToPage("/Agrupaciones/Index");
     }
 }

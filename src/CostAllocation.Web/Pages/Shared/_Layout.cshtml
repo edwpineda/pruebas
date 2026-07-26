@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="~/" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@ViewData["Title"] · Prorrateo</title>
@@ -20,8 +21,15 @@
             </nav>
         }
     </header>
-    <main class="content">
+    <main class="content @(ViewData["Wide"] != null ? "content-wide" : "")">
         @RenderBody()
     </main>
+
+    <div id="blazor-error-ui">
+        Ocurrió un error inesperado.
+        <a href="" class="reload">Recargar</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.server.js"></script>
 </body>
 </html>

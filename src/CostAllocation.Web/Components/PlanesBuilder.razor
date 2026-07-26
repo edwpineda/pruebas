@@ -1,0 +1,321 @@
+@* Isla interactiva Blazor Server: editor drag & drop de un Servicio y sus Planes.
+   Drag & drop con eventos nativos HTML5 resueltos en C# en el servidor, sin JS externo
+   (ver docs/arquitectura.md, sección 6). Cada edición persiste de inmediato vía EF Core. *@
+@inject AppDbContext Db
+@using Microsoft.EntityFrameworkCore
+
+@if (_servicio is not null && _planes is not null)
+{
+    <div class="pb-header">
+        <span class="pb-icon-btn" role="button" tabindex="0" @onclick="ToggleIconPicker">
+            @(_servicio.Icono ?? "🧩")
+            @if (_showIconPicker)
+            {
+                <div class="pb-emoji-picker" @onclick:stopPropagation>
+                    @foreach (var icono in IconosDisponibles)
+                    {
+                        <button type="button" @onclick="@(() => SelectIcon(icono))">@icono</button>
+                    }
+                </div>
+            }
+        </span>
+        <input class="pb-title-input" value="@_servicio.Nombre" @onchange="OnNombreChanged" />
+        <span class="pb-save-status">@_saveStatus</span>
+    </div>
+
+    <div class="pb-board">
+        @{ var ordenados = _planes.OrderBy(p => p.Orden).ToList(); }
+        @for (var i = 0; i < ordenados.Count; i++)
+        {
+            var plan = ordenados[i];
+            var idx = i;
+            <div class="pb-column @(_dragOverPlanId == plan.Id ? "pb-drag-over" : "")"
+                 @ondragover="@(() => _dragOverPlanId = plan.Id)" @ondragover:preventDefault
+                 @ondragleave="@(() => _dragOverPlanId = null)"
+                 @ondrop="@(() => OnColumnDrop(plan.Id))" @ondrop:preventDefault>
+
+                <div class="pb-column-header">
+                    <span class="pb-drag-handle" draggable="true"
+                          @ondragstart="@(() => _draggedPlanId = plan.Id)">⠿</span>
+                    <input class="pb-plan-name" value="@plan.Nombre" @onchange="@(e => OnPlanNombreChanged(plan, e))" />
+                    <button type="button" class="pb-del" title="Eliminar plan" @onclick="@(() => DeletePlan(plan))">✕</button>
+                </div>
+
+                <div class="pb-price-row">
+                    $<input type="number" min="0" step="0.01" class="pb-price-input" value="@plan.Precio"
+                            @onchange="@(e => OnPlanPrecioChanged(plan, e))" /> /mes
+                </div>
+
+                @if (idx > 0)
+                {
+                    <label class="pb-inherit-row">
+                        <input type="checkbox" checked="@plan.HeredaDeInferior"
+                               @onchange="@(e => OnHeredaChanged(plan, e))" />
+                        Incluye lo de "@ordenados[idx - 1].Nombre"
+                    </label>
+                }
+                else
+                {
+                    <div class="pb-inherit-row muted">Plan base</div>
+                }
+
+                <ul class="pb-features" @ondragover:preventDefault
+                    @ondrop="@(() => OnFeatureDropOnColumn(plan.Id))" @ondrop:preventDefault @ondrop:stopPropagation>
+
+                    @if (idx > 0 && plan.HeredaDeInferior)
+                    {
+                        <li class="pb-inherit-note">↳ heredadas de "@ordenados[idx - 1].Nombre":</li>
+                        @foreach (var f in GetCascada(ordenados, idx - 1))
+                        {
+                            <li class="pb-feature pb-inherited"><span class="pb-dot">↳</span><span>@f.Texto</span></li>
+                        }
+                    }
+
+                    @foreach (var f in plan.Caracteristicas.OrderBy(c => c.Orden))
+                    {
+                        var feature = f;
+                        <li class="pb-feature" draggable="true"
+                            @ondragstart="@(() => _draggedFeature = (plan.Id, feature.Id))"
+                            @ondragover:preventDefault
+                            @ondrop="@(() => OnFeatureDropOnFeature(plan.Id, feature.Id))" @ondrop:preventDefault @ondrop:stopPropagation>
+                            <span class="pb-dot">⠿</span>
+                            <input class="pb-feature-text" value="@feature.Texto" @onchange="@(e => OnFeatureTextChanged(feature, e))" />
+                            <button type="button" class="pb-del" @onclick="@(() => DeleteFeature(plan, feature))">✕</button>
+                        </li>
+                    }
+                </ul>
+
+                <button type="button" class="pb-add-feature" @onclick="@(() => AddFeature(plan))">+ Añadir característica</button>
+            </div>
+        }
+
+        <button type="button" class="pb-add-plan" @onclick="AddPlan">+ Añadir plan</button>
+    </div>
+}
+else
+{
+    <p class="empty">Cargando…</p>
+}
+
+@code {
+    [Parameter] public long ServicioId { get; set; }
+
+    private Servicio? _servicio;
+    private List<ServicioPlan>? _planes;
+
+    private long? _draggedPlanId;
+    private (long PlanId, long FeatureId)? _draggedFeature;
+    private long? _dragOverPlanId;
+    private string _saveStatus = "Guardado";
+    private bool _showIconPicker;
+
+    private static readonly string[] IconosDisponibles =
+        { "📺", "🏨", "🍽️", "🎮", "📶", "🚗", "🏋️", "🎓", "🩺", "🎵", "☎️", "🧹", "💻", "🚿", "🅿️", "🐾" };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _servicio = await Db.Servicios.FirstOrDefaultAsync(s => s.Id == ServicioId);
+        _planes = await Db.ServicioPlanes
+            .Where(p => p.ServicioId == ServicioId)
+            .Include(p => p.Caracteristicas)
+            .OrderBy(p => p.Orden)
+            .ToListAsync();
+    }
+
+    private List<ServicioPlanCaracteristica> GetCascada(List<ServicioPlan> ordenados, int index)
+    {
+        var plan = ordenados[index];
+        var acc = new List<ServicioPlanCaracteristica>();
+        if (index > 0 && plan.HeredaDeInferior)
+        {
+            acc.AddRange(GetCascada(ordenados, index - 1));
+        }
+        acc.AddRange(plan.Caracteristicas.OrderBy(c => c.Orden));
+        return acc;
+    }
+
+    private async Task SaveAsync()
+    {
+        _saveStatus = "Guardando…";
+        StateHasChanged();
+        await Db.SaveChangesAsync();
+        _saveStatus = "Guardado";
+        StateHasChanged();
+    }
+
+    private void ToggleIconPicker() => _showIconPicker = !_showIconPicker;
+
+    private async Task SelectIcon(string icono)
+    {
+        if (_servicio is null) return;
+        _servicio.Icono = icono;
+        _servicio.UpdatedAt = DateTime.UtcNow;
+        _showIconPicker = false;
+        await SaveAsync();
+    }
+
+    private async Task OnNombreChanged(ChangeEventArgs e)
+    {
+        if (_servicio is null) return;
+        _servicio.Nombre = e.Value?.ToString() ?? _servicio.Nombre;
+        _servicio.UpdatedAt = DateTime.UtcNow;
+        await SaveAsync();
+    }
+
+    private async Task OnPlanNombreChanged(ServicioPlan plan, ChangeEventArgs e)
+    {
+        plan.Nombre = e.Value?.ToString() ?? plan.Nombre;
+        plan.UpdatedAt = DateTime.UtcNow;
+        await SaveAsync();
+    }
+
+    private async Task OnPlanPrecioChanged(ServicioPlan plan, ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var precio) && precio >= 0)
+        {
+            plan.Precio = precio;
+            plan.UpdatedAt = DateTime.UtcNow;
+            await SaveAsync();
+        }
+    }
+
+    private async Task OnHeredaChanged(ServicioPlan plan, ChangeEventArgs e)
+    {
+        plan.HeredaDeInferior = e.Value is bool b && b;
+        plan.UpdatedAt = DateTime.UtcNow;
+        await SaveAsync();
+    }
+
+    private async Task OnFeatureTextChanged(ServicioPlanCaracteristica feature, ChangeEventArgs e)
+    {
+        feature.Texto = e.Value?.ToString() ?? feature.Texto;
+        await SaveAsync();
+    }
+
+    private async Task AddPlan()
+    {
+        if (_servicio is null || _planes is null) return;
+        var siguienteOrden = _planes.Any() ? _planes.Max(p => p.Orden) + 1 : 0;
+        var ahora = DateTime.UtcNow;
+        var nuevo = new ServicioPlan
+        {
+            ServicioId = ServicioId,
+            Nombre = "Nuevo plan",
+            Precio = 0,
+            HeredaDeInferior = _planes.Any(),
+            Orden = siguienteOrden,
+            CreatedAt = ahora,
+            UpdatedAt = ahora
+        };
+        Db.ServicioPlanes.Add(nuevo);
+        _planes.Add(nuevo);
+        await SaveAsync();
+    }
+
+    private async Task DeletePlan(ServicioPlan plan)
+    {
+        if (_planes is null) return;
+        Db.ServicioPlanCaracteristicas.RemoveRange(plan.Caracteristicas);
+        Db.ServicioPlanes.Remove(plan);
+        _planes.Remove(plan);
+        await SaveAsync();
+    }
+
+    private async Task AddFeature(ServicioPlan plan)
+    {
+        var nueva = new ServicioPlanCaracteristica
+        {
+            PlanId = plan.Id,
+            Texto = "Nueva característica",
+            Orden = plan.Caracteristicas.Any() ? plan.Caracteristicas.Max(c => c.Orden) + 1 : 0
+        };
+        Db.ServicioPlanCaracteristicas.Add(nueva);
+        plan.Caracteristicas.Add(nueva);
+        await SaveAsync();
+    }
+
+    private async Task DeleteFeature(ServicioPlan plan, ServicioPlanCaracteristica feature)
+    {
+        Db.ServicioPlanCaracteristicas.Remove(feature);
+        plan.Caracteristicas.Remove(feature);
+        await SaveAsync();
+    }
+
+    private async Task OnColumnDrop(long targetPlanId)
+    {
+        _dragOverPlanId = null;
+        if (_planes is null || _draggedPlanId is null || _draggedPlanId == targetPlanId) return;
+
+        var ordenados = _planes.OrderBy(p => p.Orden).ToList();
+        var dragged = ordenados.First(p => p.Id == _draggedPlanId);
+        ordenados.Remove(dragged);
+        var targetIdx = ordenados.FindIndex(p => p.Id == targetPlanId);
+        ordenados.Insert(targetIdx, dragged);
+
+        for (var i = 0; i < ordenados.Count; i++)
+        {
+            ordenados[i].Orden = i;
+        }
+
+        _draggedPlanId = null;
+        await SaveAsync();
+    }
+
+    private async Task OnFeatureDropOnColumn(long targetPlanId)
+    {
+        if (_draggedFeature is null) return;
+        var (fromPlanId, featureId) = _draggedFeature.Value;
+        _draggedFeature = null;
+        await MoveFeature(fromPlanId, featureId, targetPlanId, null);
+    }
+
+    private async Task OnFeatureDropOnFeature(long targetPlanId, long beforeFeatureId)
+    {
+        if (_draggedFeature is null) return;
+        var (fromPlanId, featureId) = _draggedFeature.Value;
+        _draggedFeature = null;
+        if (featureId == beforeFeatureId) return;
+        await MoveFeature(fromPlanId, featureId, targetPlanId, beforeFeatureId);
+    }
+
+    private async Task MoveFeature(long fromPlanId, long featureId, long toPlanId, long? beforeFeatureId)
+    {
+        if (_planes is null) return;
+        var fromPlan = _planes.First(p => p.Id == fromPlanId);
+        var toPlan = _planes.First(p => p.Id == toPlanId);
+        var feature = fromPlan.Caracteristicas.FirstOrDefault(c => c.Id == featureId);
+        if (feature is null) return;
+
+        fromPlan.Caracteristicas.Remove(feature);
+        Renumerar(fromPlan.Caracteristicas);
+
+        feature.PlanId = toPlanId;
+
+        var destino = toPlan.Caracteristicas.OrderBy(c => c.Orden).ToList();
+        var insertIdx = beforeFeatureId.HasValue ? destino.FindIndex(c => c.Id == beforeFeatureId.Value) : -1;
+        if (insertIdx < 0) insertIdx = destino.Count;
+
+        for (var i = 0; i < destino.Count; i++)
+        {
+            destino[i].Orden = i >= insertIdx ? i + 1 : i;
+        }
+        feature.Orden = insertIdx;
+        toPlan.Caracteristicas.Add(feature);
+
+        await SaveAsync();
+    }
+
+    private static void Renumerar(IEnumerable<ServicioPlanCaracteristica> items)
+    {
+        var ordenadas = items.OrderBy(c => c.Orden).ToList();
+        for (var i = 0; i < ordenadas.Count; i++)
+        {
+            ordenadas[i].Orden = i;
+        }
+    }
+}

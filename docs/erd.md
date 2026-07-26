@@ -7,10 +7,16 @@ erDiagram
     AGRUPACIONES ||--o{ PROVEEDORES : registra
     AGRUPACIONES ||--o{ PERIODOS : factura_en
     AGRUPACIONES ||--o{ CUENTAS_FONDO : posee
+    AGRUPACIONES ||--o{ SERVICIOS : ofrece
 
     UNIDADES ||--o{ UNIDAD_COEFICIENTES : historial_coeficiente
     UNIDADES ||--o{ UNIDAD_PERSONA : relaciona
     PERSONAS ||--o{ UNIDAD_PERSONA : relaciona
+
+    SERVICIOS ||--o{ SERVICIO_PLANES : tiene
+    SERVICIO_PLANES ||--o{ SERVICIO_PLAN_CARACTERISTICAS : incluye
+    UNIDADES ||--o{ UNIDAD_SERVICIO_PLANES : se_suscribe
+    SERVICIO_PLANES ||--o{ UNIDAD_SERVICIO_PLANES : suscribe_a
 
     CONCEPTOS_GASTO ||--o{ GASTOS : clasifica
     METODOS_PRORRATEO ||--o{ CONCEPTOS_GASTO : default
@@ -51,3 +57,8 @@ erDiagram
 7. Los ingresos que **no** se prorratean a las unidades (parqueadero, alquiler de espacios,
    eventos) van a `INGRESOS_EXTRAORDINARIOS`, y junto con los pagos alimentan el ledger de
    `MOVIMIENTOS_FONDO` sobre una `CUENTA_FONDO` (Caja General, Fondo de Reserva, etc.).
+8. Opcionalmente, la `AGRUPACION` ofrece `SERVICIOS` adicionales (TV, comida, hospedaje, etc.)
+   organizados en `SERVICIO_PLANES` jerárquicos: cada plan puede heredar en cascada las
+   `SERVICIO_PLAN_CARACTERISTICAS` del plan inmediato inferior y sumar las propias. Una
+   `UNIDAD` se suscribe a un plan vía `UNIDAD_SERVICIO_PLANES`; la integración de ese cobro al
+   ciclo de `CARGOS` todavía no está automatizada.
