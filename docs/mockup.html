@@ -60,7 +60,7 @@
     letter-spacing:.02em;
   }
   .mono{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;}
-  button{font-family:inherit;}
+  button,select{font-family:inherit;}
 
   /* disclaimer */
   .disclaimer{
@@ -93,13 +93,8 @@
     white-space:nowrap;
   }
   .platform-mark .dot{width:.6rem; height:.6rem; border-radius:50%; background:var(--brand);}
-  .platform-mark .co{
-    font-size:.62rem; font-weight:700; letter-spacing:.08em;
-    background:var(--surface-alt); color:var(--ink-soft);
-    padding:.15rem .4rem; border-radius:3px; margin-left:.15rem;
-  }
 
-  .tenant-switch{display:flex; gap:.4rem; align-items:center;}
+  .tenant-switch{display:flex; gap:.4rem; align-items:center; flex-wrap:wrap;}
   .tenant-chip{
     display:flex; align-items:center; gap:.45rem;
     border:1px solid var(--line); background:var(--surface);
@@ -151,14 +146,13 @@
   }
   .hero h1{font-size:clamp(1.6rem,4vw,2.3rem); margin:0 0 .5rem; text-wrap:balance;}
   .hero p.tagline{margin:0; color:var(--ink-soft); font-size:1rem;}
-  .hero-cta{
-    display:flex; gap:.7rem; margin-top:1.3rem; flex-wrap:wrap;
-  }
+  .hero-cta{display:flex; gap:.7rem; margin-top:1.3rem; flex-wrap:wrap;}
   .btn{
     border:none; cursor:pointer; border-radius:8px;
     padding:.65rem 1.1rem; font-size:.86rem; font-weight:700;
     display:inline-flex; align-items:center; gap:.4rem;
   }
+  .btn-sm{padding:.4rem .75rem; font-size:.78rem;}
   .btn-primary{background:var(--tenant-accent); color:#0d1410;}
   .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--ink);}
 
@@ -176,17 +170,11 @@
   .section-head .sub{font-size:.85rem; color:var(--ink-faint);}
 
   .cat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:.9rem;}
-  .cat-card{
-    background:var(--surface); border:1px solid var(--line); border-radius:10px;
-    padding:1rem 1.1rem;
-  }
+  .cat-card{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem;}
   .cat-card h3{margin:0 0 .2rem; font-size:1rem;}
   .cat-card .edad{font-size:.8rem; color:var(--ink-faint); margin-bottom:.6rem;}
   .cat-card .row{display:flex; justify-content:space-between; font-size:.82rem; color:var(--ink-soft); padding:.25rem 0; border-top:1px dashed var(--line);}
-  .badge{
-    display:inline-block; padding:.15rem .5rem; border-radius:20px;
-    font-size:.68rem; font-weight:700; letter-spacing:.02em;
-  }
+  .badge{display:inline-block; padding:.15rem .5rem; border-radius:20px; font-size:.68rem; font-weight:700; letter-spacing:.02em;}
   .badge.open{background:var(--good-soft); color:var(--good);}
   .badge.full{background:var(--bad-soft); color:var(--bad);}
 
@@ -196,22 +184,20 @@
     text-align:left; font-size:.7rem; letter-spacing:.06em; text-transform:uppercase;
     color:var(--ink-faint); padding:.7rem .9rem; border-bottom:1px solid var(--line); background:var(--surface-alt);
   }
-  tbody td{padding:.75rem .9rem; border-bottom:1px solid var(--line);}
+  tbody td{padding:.75rem .9rem; border-bottom:1px solid var(--line); vertical-align:middle;}
   tbody tr:last-child td{border-bottom:none;}
   .pill-result{padding:.15rem .55rem; border-radius:20px; font-size:.72rem; font-weight:700;}
   .pill-win{background:var(--good-soft); color:var(--good);}
   .pill-next{background:var(--warn-soft); color:var(--warn);}
+  .pill-live{background:var(--good-soft); color:var(--good);}
+  .pill-sched{background:var(--warn-soft); color:var(--warn);}
+  .pill-done{background:var(--surface-alt); color:var(--ink-faint);}
+  .pill-confirm{background:var(--warn-soft); color:var(--warn);}
+  .pill-ok{background:var(--good-soft); color:var(--good);}
 
   .feed{display:flex; flex-direction:column; gap:.7rem;}
-  .feed-item{
-    display:flex; gap:.9rem; align-items:flex-start;
-    background:var(--surface); border:1px solid var(--line); border-radius:10px;
-    padding:.9rem 1.1rem;
-  }
-  .feed-item .date{
-    font-family:ui-monospace,monospace; font-size:.72rem; color:var(--ink-faint);
-    white-space:nowrap; padding-top:.15rem; min-width:3.6rem;
-  }
+  .feed-item{display:flex; gap:.9rem; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:.9rem 1.1rem;}
+  .feed-item .date{font-family:ui-monospace,monospace; font-size:.72rem; color:var(--ink-faint); white-space:nowrap; padding-top:.15rem; min-width:3.6rem;}
   .feed-item .body{flex:1;}
   .feed-item h4{margin:0 0 .2rem; font-size:.92rem; display:flex; align-items:center; gap:.5rem;}
   .feed-item .cat-tag{font-size:.68rem; color:var(--tenant-accent); font-weight:700; text-transform:uppercase; letter-spacing:.04em;}
@@ -230,10 +216,7 @@
     display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;
     font-size:.82rem; color:var(--ink-faint);
   }
-  footer.site-footer .wa{
-    display:inline-flex; align-items:center; gap:.4rem;
-    color:var(--good); font-weight:700;
-  }
+  footer.site-footer .wa{display:inline-flex; align-items:center; gap:.4rem; color:var(--good); font-weight:700;}
 
   /* ---------- DIRECTOR VIEW ---------- */
   .app-shell{
@@ -247,27 +230,30 @@
   .nav-item{
     display:flex; align-items:center; gap:.6rem;
     padding:.55rem .7rem; border-radius:7px; font-size:.86rem;
-    margin-bottom:.15rem; cursor:default;
+    margin-bottom:.15rem; cursor:default; border:none; background:transparent;
+    color:inherit; width:100%; text-align:left;
   }
+  .nav-item.clickable{cursor:pointer;}
+  .nav-item.clickable:hover{background:rgba(255,255,255,.06);}
   .nav-item.active{background:rgba(255,255,255,.1); color:#fff; font-weight:600;}
   .app-main{background:var(--surface); padding:1.6rem 1.8rem;}
   .app-main h2{margin:0 0 1.2rem; font-size:1.2rem;}
+  .dir-view{display:none;}
+  .dir-view.active{display:block;}
 
   .stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.8rem; margin-bottom:1.6rem;}
   .stat-tile{border:1px solid var(--line); border-radius:10px; padding:.9rem 1rem; background:var(--surface-alt);}
   .stat-tile .n{font-size:1.5rem; font-weight:800; font-variant-numeric:tabular-nums;}
   .stat-tile .l{font-size:.75rem; color:var(--ink-faint); letter-spacing:.02em;}
 
-  .composer{
-    border:1px solid var(--line); border-radius:10px; padding:1.1rem 1.2rem;
-    background:var(--surface-alt); margin-bottom:1.6rem;
-  }
+  .composer{border:1px solid var(--line); border-radius:10px; padding:1.1rem 1.2rem; background:var(--surface-alt); margin-bottom:1.6rem;}
   .composer .field-label{font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-weight:700; margin-bottom:.3rem; display:block;}
-  .fake-input{
-    background:var(--surface); border:1px solid var(--line); border-radius:6px;
-    padding:.55rem .7rem; font-size:.86rem; color:var(--ink-faint); margin-bottom:.8rem;
-  }
+  .fake-input{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:.55rem .7rem; font-size:.86rem; color:var(--ink-faint); margin-bottom:.8rem;}
   .fake-textarea{min-height:3.2rem;}
+  select.real-select{
+    width:100%; background:var(--surface); border:1px solid var(--line); border-radius:6px;
+    padding:.55rem .7rem; font-size:.86rem; color:var(--ink); margin-bottom:.8rem;
+  }
   .composer-row{display:flex; gap:.8rem; flex-wrap:wrap;}
   .composer-row > div{flex:1; min-width:160px;}
 
@@ -275,40 +261,63 @@
   .status-live{background:var(--good-soft); color:var(--good);}
   .status-sched{background:var(--warn-soft); color:var(--warn);}
 
+  .format-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:.8rem; margin-bottom:1.8rem;}
+  .format-card{border:1px solid var(--line); border-radius:10px; padding:.9rem 1rem; background:var(--surface-alt);}
+  .format-card h4{margin:0 0 .35rem; font-size:.9rem;}
+  .format-card p{margin:0; font-size:.78rem; color:var(--ink-faint); line-height:1.5;}
+
+  .mini-stat-row{display:flex; gap:.8rem; margin-bottom:1.4rem; flex-wrap:wrap;}
+  .mini-stat{border:1px solid var(--line); border-radius:10px; padding:.7rem 1rem; background:var(--surface-alt); min-width:180px;}
+  .mini-stat .n{font-size:1.25rem; font-weight:800; font-variant-numeric:tabular-nums;}
+  .mini-stat .l{font-size:.72rem; color:var(--ink-faint);}
+  .mini-stat.warn .n{color:var(--warn);}
+  .mini-stat.bad .n{color:var(--bad);}
+
   /* ---------- PARENT VIEW ---------- */
-  .parent-head{
-    margin-top:1.4rem; display:flex; justify-content:space-between; align-items:center;
-    flex-wrap:wrap; gap:1rem;
-  }
+  .parent-head{margin-top:1.4rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;}
   .parent-head h1{font-size:1.4rem; margin:0 0 .2rem;}
   .parent-head p{margin:0; color:var(--ink-soft); font-size:.9rem;}
-  .avatar{
-    width:2.6rem; height:2.6rem; border-radius:50%; background:var(--tenant-accent);
-    display:flex; align-items:center; justify-content:center; color:#0d1410; font-weight:800;
-  }
+  .avatar{width:2.6rem; height:2.6rem; border-radius:50%; background:var(--tenant-accent); display:flex; align-items:center; justify-content:center; color:#0d1410; font-weight:800;}
   .parent-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:1rem; margin-top:1.4rem;}
-  @media (max-width:760px){.parent-grid{grid-template-columns:1fr;} .app-shell{grid-template-columns:1fr;} .app-sidebar{display:none;}}
+  @media (max-width:760px){.parent-grid{grid-template-columns:1fr;} .app-shell{grid-template-columns:1fr;} .app-sidebar{display:flex; flex-wrap:wrap; gap:.3rem;}}
   .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem;}
   .card .k{font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-weight:700; margin-bottom:.5rem;}
-  .pay-status{display:flex; align-items:center; justify-content:space-between;}
+  .pay-status{display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap;}
   .pay-status .amount{font-size:1.5rem; font-weight:800; font-variant-numeric:tabular-nums;}
   .pay-ok{color:var(--good);}
+  .pay-warn{color:var(--warn);}
   .match-row{display:flex; justify-content:space-between; align-items:center; padding:.5rem 0; border-top:1px dashed var(--line);}
   .match-row:first-of-type{border-top:none;}
 
-  .note{
-    font-size:.78rem; color:var(--ink-faint); margin-top:2.2rem; padding-top:1rem;
-    border-top:1px solid var(--line);
+  .dropzone{
+    margin-top:1rem; border:1.5px dashed var(--line); border-radius:10px;
+    padding:1.1rem; text-align:center; color:var(--ink-faint); font-size:.84rem;
+    background:var(--surface-alt);
   }
+  .dropzone .icon{font-size:1.4rem; display:block; margin-bottom:.3rem;}
+  .uploaded-file{
+    display:flex; align-items:center; justify-content:space-between; gap:.6rem;
+    background:var(--surface-alt); border:1px solid var(--line); border-radius:8px;
+    padding:.6rem .8rem; margin-top:.8rem; font-size:.82rem;
+  }
+  .uploaded-file .name{color:var(--ink); font-weight:600;}
+  .uploaded-file .meta{color:var(--ink-faint); font-size:.76rem;}
+
+  .torneo-row{display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding:.65rem 0; border-top:1px dashed var(--line);}
+  .torneo-row:first-of-type{border-top:none;}
+  .torneo-row .nombre{font-weight:600; font-size:.9rem;}
+  .torneo-row .formato{font-size:.76rem; color:var(--ink-faint);}
+
+  .note{font-size:.78rem; color:var(--ink-faint); margin-top:2.2rem; padding-top:1rem; border-top:1px solid var(--line);}
 </style>
 </head>
 <body>
 
-  <div class="disclaimer">PROTOTIPO / PROPUESTA — datos ilustrativos, no es el sitio real de ninguna escuela. Contenido por validar con cada director.</div>
+  <div class="disclaimer">PROTOTIPO / PROPUESTA — nombres de escuelas enmascarados, datos ilustrativos. No es el sitio real de ninguna escuela.</div>
 
   <div class="topbar">
     <div class="topbar-inner">
-      <div class="platform-mark"><span class="dot"></span>torneos.co <span class="co">CO</span></div>
+      <div class="platform-mark"><span class="dot"></span>deporvista.com</div>
 
       <div class="tenant-switch" id="tenantSwitch"></div>
 
@@ -342,18 +351,12 @@
       </div>
 
       <div class="section">
-        <div class="section-head">
-          <h2>Categorías por edad</h2>
-          <span class="sub">Horarios y cupos actualizados por el director</span>
-        </div>
+        <div class="section-head"><h2>Categorías por edad</h2><span class="sub">Horarios y cupos actualizados por el director</span></div>
         <div class="cat-grid" id="pub-categorias"></div>
       </div>
 
       <div class="section">
-        <div class="section-head">
-          <h2>Torneos y resultados</h2>
-          <span class="sub">Filtrable por categoría en el sitio real</span>
-        </div>
+        <div class="section-head"><h2>Torneos y resultados</h2><span class="sub">Filtrable por categoría en el sitio real</span></div>
         <div class="table-wrap">
           <table id="pub-torneos">
             <thead><tr><th>Torneo</th><th>Fecha</th><th>Sede</th><th>Estado</th></tr></thead>
@@ -363,10 +366,7 @@
       </div>
 
       <div class="section">
-        <div class="section-head">
-          <h2>Comunicados</h2>
-          <span class="sub">Publicados por el director de la escuela</span>
-        </div>
+        <div class="section-head"><h2>Comunicados</h2><span class="sub">Publicados por el director de la escuela</span></div>
         <div class="feed" id="pub-comunicados"></div>
       </div>
 
@@ -387,54 +387,101 @@
     <!-- ================= DIRECTOR VIEW ================= -->
     <section class="view" id="view-director">
       <div class="app-shell">
-        <div class="app-sidebar">
+        <div class="app-sidebar" id="dirNav">
           <div class="who">Sesión de<b id="dir-name">—</b></div>
-          <div class="nav-item active">📋 Resumen</div>
-          <div class="nav-item">📣 Comunicados</div>
-          <div class="nav-item">🏆 Torneos</div>
+          <button class="nav-item clickable active" data-section="resumen">📋 Resumen</button>
+          <button class="nav-item clickable" data-section="comunicados">📣 Comunicados</button>
+          <button class="nav-item clickable" data-section="torneos">🏆 Torneos</button>
           <div class="nav-item">🧒 Categorías</div>
-          <div class="nav-item">💳 Pagos</div>
+          <button class="nav-item clickable" data-section="pagos">💳 Pagos</button>
           <div class="nav-item">🖼️ Fotos</div>
           <div class="nav-item">⚙️ Configuración</div>
         </div>
         <div class="app-main">
-          <h2>Resumen de la escuela</h2>
-          <div class="stat-row">
-            <div class="stat-tile"><div class="n">3</div><div class="l">Comunicados este mes</div></div>
-            <div class="stat-tile"><div class="n">128</div><div class="l">Deportistas activos</div></div>
-            <div class="stat-tile"><div class="n" style="color:var(--warn)">6</div><div class="l">Pagos pendientes</div></div>
-            <div class="stat-tile"><div class="n" style="color:var(--good)">$4.8M</div><div class="l">Recaudado en agosto (COP)</div></div>
+
+          <!-- Resumen -->
+          <div class="dir-view active" id="dir-resumen">
+            <h2>Resumen de la escuela</h2>
+            <div class="stat-row" id="dir-stats"></div>
+            <span class="field-label" style="margin-bottom:.6rem; display:block;">Últimos comunicados</span>
+            <div class="feed" id="dir-resumen-comunicados"></div>
           </div>
 
-          <div class="composer">
-            <span class="field-label">Nuevo comunicado</span>
-            <div class="fake-input">Ej: Cambio de horario categoría Sub-10</div>
-            <div class="composer-row">
-              <div>
-                <span class="field-label">Categoría destino</span>
-                <div class="fake-input">Todas las categorías ▾</div>
+          <!-- Comunicados -->
+          <div class="dir-view" id="dir-comunicados">
+            <h2>Comunicados</h2>
+            <div class="composer">
+              <span class="field-label">Nuevo comunicado</span>
+              <div class="fake-input">Ej: Cambio de horario categoría Sub-10</div>
+              <div class="composer-row">
+                <div><span class="field-label">Categoría destino</span><div class="fake-input">Todas las categorías ▾</div></div>
+                <div><span class="field-label">Publicar</span><div class="fake-input">Ahora ▾</div></div>
               </div>
-              <div>
-                <span class="field-label">Publicar</span>
-                <div class="fake-input">Ahora ▾</div>
-              </div>
+              <span class="field-label">Mensaje</span>
+              <div class="fake-input fake-textarea">Escribe el comunicado para los padres de esta categoría…</div>
+              <button class="btn btn-primary" style="background:var(--brand); color:#fff;">Publicar comunicado</button>
             </div>
-            <span class="field-label">Mensaje</span>
-            <div class="fake-input fake-textarea">Escribe el comunicado para los padres de esta categoría…</div>
-            <button class="btn btn-primary" style="background:var(--brand); color:#fff;">Publicar comunicado</button>
+            <span class="field-label" style="margin-bottom:.6rem; display:block;">Historial</span>
+            <div class="table-wrap">
+              <table id="dir-comunicados-table">
+                <thead><tr><th>Título</th><th>Categoría</th><th>Fecha</th><th>Estado</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
 
-          <span class="field-label" style="margin-bottom:.6rem; display:block;">Últimos comunicados</span>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Título</th><th>Categoría</th><th>Fecha</th><th>Estado</th></tr></thead>
-              <tbody>
-                <tr><td>Cambio de horario categoría Sub-10</td><td>Sub-10</td><td>7 ago</td><td><span class="status-pill status-live">Publicado</span></td></tr>
-                <tr><td>Pago de mensualidad de agosto</td><td>Todas</td><td>1 ago</td><td><span class="status-pill status-live">Publicado</span></td></tr>
-                <tr><td>Reunión de padres — inicio de torneo</td><td>Sub-12, Sub-15</td><td>12 ago</td><td><span class="status-pill status-sched">Programado</span></td></tr>
-              </tbody>
-            </table>
+          <!-- Torneos -->
+          <div class="dir-view" id="dir-torneos">
+            <h2>Configuración de torneos</h2>
+            <span class="field-label" style="margin-bottom:.6rem; display:block;">Catálogo de formatos disponibles</span>
+            <div class="format-grid" id="dir-format-catalog"></div>
+
+            <span class="field-label" style="margin-bottom:.6rem; display:block;">Torneos configurados de esta escuela</span>
+            <div class="table-wrap" style="margin-bottom:1.6rem;">
+              <table>
+                <thead><tr><th>Torneo</th><th>Formato</th><th>Categoría</th><th>Estado</th></tr></thead>
+                <tbody id="dir-torneos-table"></tbody>
+              </table>
+            </div>
+
+            <div class="composer">
+              <span class="field-label">Configurar nuevo torneo</span>
+              <div class="fake-input">Ej: Copa Interna Sub-10 2026</div>
+              <div class="composer-row">
+                <div>
+                  <span class="field-label">Formato</span>
+                  <select class="real-select" id="dir-formato-select">
+                    <option>Selecciona un formato…</option>
+                  </select>
+                </div>
+                <div>
+                  <span class="field-label">Categoría</span>
+                  <select class="real-select" id="dir-categoria-select">
+                    <option>Selecciona una categoría…</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-primary" style="background:var(--brand); color:#fff;">Configurar torneo</button>
+            </div>
           </div>
+
+          <!-- Pagos -->
+          <div class="dir-view" id="dir-pagos">
+            <h2>Pagos</h2>
+            <div class="mini-stat-row" id="dir-pagos-stats"></div>
+            <span class="field-label" style="margin-bottom:.6rem; display:block;">Comprobantes recibidos</span>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Acudiente</th><th>Categoría</th><th>Monto</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>María Gómez</td><td id="pg-cat1">—</td><td class="mono">$120.000</td><td><span class="pill-result pill-confirm">Por confirmar</span></td><td>5 ago</td><td><button class="btn btn-ghost btn-sm">Confirmar pago</button></td></tr>
+                  <tr><td>Carlos Ruiz</td><td id="pg-cat2">—</td><td class="mono">$120.000</td><td><span class="pill-result pill-confirm">Por confirmar</span></td><td>6 ago</td><td><button class="btn btn-ghost btn-sm">Confirmar pago</button></td></tr>
+                  <tr><td>Ana Torres</td><td id="pg-cat3">—</td><td class="mono">$120.000</td><td><span class="pill-result pill-ok">Confirmado</span></td><td>3 ago</td><td>—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -454,10 +501,21 @@
           <div class="k">Estado de la mensualidad</div>
           <div class="pay-status">
             <div>
-              <div class="amount pay-ok">Al día</div>
-              <div style="font-size:.82rem; color:var(--ink-faint);">Agosto 2026 · pagado el 3 ago vía PSE</div>
+              <div class="amount pay-warn">Pendiente por confirmar</div>
+              <div style="font-size:.82rem; color:var(--ink-faint);">Agosto 2026 · comprobante subido el 5 ago, en revisión por el director</div>
             </div>
-            <button class="btn btn-ghost">Ver historial</button>
+            <button class="btn btn-ghost btn-sm">Ver historial</button>
+          </div>
+          <div class="uploaded-file">
+            <div>
+              <div class="name">comprobante_agosto.pdf</div>
+              <div class="meta">Subido el 5 ago · 210 KB</div>
+            </div>
+            <button class="btn btn-ghost btn-sm">Reemplazar</button>
+          </div>
+          <div class="dropzone">
+            <span class="icon">📎</span>
+            Arrastra tu comprobante aquí o haz clic para subir (PDF, JPG, PNG)
           </div>
         </div>
         <div class="card">
@@ -468,17 +526,20 @@
       </div>
 
       <div class="section">
+        <div class="section-head"><h2>Torneos de tu escuela</h2><span class="sub">Configurados por el director</span></div>
+        <div class="card" id="par-torneos"></div>
+      </div>
+
+      <div class="section">
         <div class="section-head"><h2>Comunicados para tu categoría</h2></div>
         <div class="feed">
           <div class="feed-item">
             <div class="date">7 ago</div>
-            <div class="body"><h4><span class="new-dot"></span>Cambio de horario categoría Sub-10</h4>
-            <span class="cat-tag">Sub-10</span></div>
+            <div class="body"><h4><span class="new-dot"></span>Cambio de horario categoría Sub-10</h4><span class="cat-tag">Sub-10</span></div>
           </div>
           <div class="feed-item">
             <div class="date">1 ago</div>
-            <div class="body"><h4>Pago de mensualidad de agosto</h4>
-            <span class="cat-tag">Todas las categorías</span></div>
+            <div class="body"><h4>Pago de mensualidad de agosto</h4><span class="cat-tag">Todas las categorías</span></div>
           </div>
         </div>
       </div>
@@ -486,17 +547,26 @@
       <button class="btn btn-primary" style="background:var(--brand); color:#fff; margin-top:1.6rem;">Pagar mensualidad de septiembre</button>
     </section>
 
-    <p class="note">Mockup estático de exploración — sin backend real. Nombres de escuelas usados como referencia de tus tres sitios; horarios, categorías y cifras son ilustrativos para validar contigo antes de construir.</p>
+    <p class="note">Mockup estático de exploración — sin backend real. Los nombres de las tres escuelas están enmascarados a pedido; horarios, categorías, torneos y cifras son ilustrativos para validar contigo antes de construir.</p>
   </main>
 
 <script>
+  const FORMATS = {
+    "liga-pura":       { n: "Liga pura — La Liga 2025-26", desc: "Todos contra todos, ida y vuelta. Gana quien más puntos sume." },
+    "copa-mundo":       { n: "Copa del Mundo", desc: "Fase de grupos y luego eliminación directa desde octavos." },
+    "champions-suizo":  { n: "Champions League (formato suizo, 36 equipos)", desc: "Liga única de 36 equipos con 8 partidos cada uno; los mejores clasifican directo y el resto juega un playoff de acceso." },
+    "copa-rey":         { n: "Copa del Rey", desc: "Eliminación directa a partido único desde la primera ronda." },
+    "supercopa":        { n: "Supercopa de España", desc: "Torneo corto de 4 equipos: semifinales y final." },
+  };
+
   const TENANTS = {
-    caterpillar: {
-      name: "Club Caterpillar Motor", short: "CM",
-      tagline: "Escuela de motociclismo infantil y juvenil.",
+    e1: {
+      name: "Escuela Fútbol Club 1", short: "F1",
+      tagline: "Escuela de formación en fútbol.",
       sede: "Bogotá, Colombia",
       accentLight: "#C98A12", accentDark: "#E0A83E",
-      next: { name: "Copa Caterpillar Sub-11", when: "16 ago 2026 · Pista El Salitre" },
+      next: { name: "Copa Interna Sub-11", when: "16 ago 2026 · Cancha El Salitre" },
+      stats: { comunicados: 3, deportistas: 128, porConfirmar: 4, pendientes: 6, recaudado: "$4.8M" },
       categorias: [
         { n: "Pre-infantil", edad: "5–7 años", horario: "Sáb 8:00 am", cupos: "4 cupos", full:false },
         { n: "Infantil", edad: "8–11 años", horario: "Mar y Jue 4:00 pm", cupos: "Lleno", full:true },
@@ -504,20 +574,25 @@
         { n: "Competición", edad: "16+ años", horario: "Lun a Vie 5:00 pm", cupos: "2 cupos", full:false },
       ],
       torneos: [
-        { r: "Copa Caterpillar Sub-11", f: "16 ago 2026", lugar: "Pista El Salitre", estado: "Próximo", win:null },
-        { r: "Nacional Infantil MX", f: "2 ago 2026", lugar: "Circuito Tocancipá", estado: "3er lugar", win:true },
+        { r: "Copa Interna Sub-11", f: "16 ago 2026", lugar: "Cancha El Salitre", estado: "Próximo", win:null },
+        { r: "Liga Distrital Infantil", f: "2 ago 2026", lugar: "Complejo Deportivo Norte", estado: "3er lugar", win:true },
       ],
       comunicados: [
         { t: "Cambio de horario categoría Infantil", cat: "Infantil", f: "7 ago", nuevo: true },
         { t: "Pago de mensualidad de agosto", cat: "Todas", f: "1 ago", nuevo: false },
       ],
+      torneosConfig: [
+        { nombre: "Copa Interna Sub-11", formato: "copa-mundo", categoria: "Infantil", estado: "Próximo" },
+        { nombre: "Liga Interna Juvenil 2026", formato: "liga-pura", categoria: "Juvenil", estado: "En curso" },
+      ],
     },
-    sierra: {
-      name: "Sierra FC", short: "SF",
+    e2: {
+      name: "Escuela Fútbol Club 2", short: "F2",
       tagline: "Escuela de formación en fútbol.",
       sede: "Cali, Colombia",
       accentLight: "#1F7A4D", accentDark: "#4CAF7D",
-      next: { name: "Copa Sierra Sub-12", when: "16 ago 2026 · Cancha Municipal" },
+      next: { name: "Copa Interna Sub-12", when: "16 ago 2026 · Cancha Municipal" },
+      stats: { comunicados: 4, deportistas: 96, porConfirmar: 3, pendientes: 5, recaudado: "$3.6M" },
       categorias: [
         { n: "Sub-8", edad: "6–8 años", horario: "Lun y Mié 3:00 pm", cupos: "5 cupos", full:false },
         { n: "Sub-10", edad: "9–10 años", horario: "Lun y Mié 4:00 pm", cupos: "3 cupos", full:false },
@@ -525,7 +600,7 @@
         { n: "Sub-15", edad: "13–15 años", horario: "Mar y Jue 6:00 pm", cupos: "6 cupos", full:false },
       ],
       torneos: [
-        { r: "Copa Sierra Sub-12", f: "16 ago 2026", lugar: "Cancha Municipal", estado: "Próximo", win:null },
+        { r: "Copa Interna Sub-12", f: "16 ago 2026", lugar: "Cancha Municipal", estado: "Próximo", win:null },
         { r: "Liga Local Sub-15", f: "27 jul 2026", lugar: "Coliseo del Sur", estado: "Ganado 3-1", win:true },
       ],
       comunicados: [
@@ -533,13 +608,18 @@
         { t: "Reunión de padres — inicio de torneo", cat: "Sub-12, Sub-15", f: "12 ago", nuevo: true },
         { t: "Pago de mensualidad de agosto", cat: "Todas", f: "1 ago", nuevo: false },
       ],
+      torneosConfig: [
+        { nombre: "Copa Interna Sub-12", formato: "copa-rey", categoria: "Sub-12", estado: "Próximo" },
+        { nombre: "Liga Interna Sub-15", formato: "liga-pura", categoria: "Sub-15", estado: "En curso" },
+      ],
     },
-    fortaleza: {
-      name: "Fortaleza CEIF", short: "FC",
-      tagline: "Centro de formación deportiva integral.",
+    e3: {
+      name: "Escuela Fútbol Club 3", short: "F3",
+      tagline: "Escuela de formación en fútbol.",
       sede: "Medellín, Colombia",
       accentLight: "#1B3A6B", accentDark: "#6C93D0",
-      next: { name: "Encuentro Fortaleza Multideporte", when: "23 ago 2026 · Coliseo CEIF" },
+      next: { name: "Encuentro Interescolar", when: "23 ago 2026 · Coliseo Central" },
+      stats: { comunicados: 2, deportistas: 74, porConfirmar: 2, pendientes: 4, recaudado: "$2.9M" },
       categorias: [
         { n: "Semillero", edad: "4–6 años", horario: "Sáb 9:00 am", cupos: "8 cupos", full:false },
         { n: "Formativa", edad: "7–10 años", horario: "Mar y Jue 3:00 pm", cupos: "4 cupos", full:false },
@@ -547,20 +627,22 @@
         { n: "Avanzada", edad: "14+ años", horario: "Lun a Vie 6:00 pm", cupos: "3 cupos", full:false },
       ],
       torneos: [
-        { r: "Encuentro Fortaleza Multideporte", f: "23 ago 2026", lugar: "Coliseo CEIF", estado: "Próximo", win:null },
+        { r: "Encuentro Interescolar", f: "23 ago 2026", lugar: "Coliseo Central", estado: "Próximo", win:null },
         { r: "Copa Integración Regional", f: "9 ago 2026", lugar: "Unidad Deportiva Sur", estado: "2do lugar", win:true },
       ],
       comunicados: [
         { t: "Entrega de uniformes categoría Formativa", cat: "Formativa", f: "6 ago", nuevo: true },
         { t: "Pago de mensualidad de agosto", cat: "Todas", f: "1 ago", nuevo: false },
       ],
+      torneosConfig: [
+        { nombre: "Encuentro Interescolar", formato: "supercopa", categoria: "Formativa", estado: "Próximo" },
+        { nombre: "Copa Integración Regional", formato: "champions-suizo", categoria: "Intermedia", estado: "Finalizado" },
+      ],
     },
   };
 
-  let currentTenant = "sierra";
+  let currentTenant = "e2";
   let currentRole = "public";
-
-  function initials(name){ return name.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase(); }
 
   function renderTenantSwitch(){
     const el = document.getElementById("tenantSwitch");
@@ -572,6 +654,12 @@
     el.querySelectorAll(".tenant-chip").forEach(btn=>{
       btn.addEventListener("click", ()=>{ currentTenant = btn.dataset.tenant; renderAll(); });
     });
+  }
+
+  function estadoPillClass(estado){
+    if(estado === "Próximo") return "pill-sched";
+    if(estado === "En curso") return "pill-live";
+    return "pill-done";
   }
 
   function renderPublic(){
@@ -610,11 +698,65 @@
   }
 
   function renderDirector(){
-    document.getElementById("dir-name").textContent = "Director — " + TENANTS[currentTenant].name;
+    const t = TENANTS[currentTenant];
+    document.getElementById("dir-name").textContent = "Director — " + t.name;
+
+    document.getElementById("dir-stats").innerHTML = `
+      <div class="stat-tile"><div class="n">${t.stats.comunicados}</div><div class="l">Comunicados este mes</div></div>
+      <div class="stat-tile"><div class="n">${t.stats.deportistas}</div><div class="l">Deportistas activos</div></div>
+      <div class="stat-tile"><div class="n" style="color:var(--warn)">${t.stats.porConfirmar}</div><div class="l">Pagos pendientes por confirmar</div></div>
+      <div class="stat-tile"><div class="n" style="color:var(--bad)">${t.stats.pendientes}</div><div class="l">Pagos pendientes</div></div>
+      <div class="stat-tile"><div class="n" style="color:var(--good)">${t.stats.recaudado}</div><div class="l">Recaudado en agosto (COP)</div></div>
+    `;
+
+    document.getElementById("dir-resumen-comunicados").innerHTML = t.comunicados.slice(0,2).map(c => `
+      <div class="feed-item">
+        <div class="date">${c.f}</div>
+        <div class="body"><h4>${c.nuevo ? '<span class="new-dot"></span>' : ''}${c.t}</h4><span class="cat-tag">${c.cat}</span></div>
+      </div>`).join("");
+
+    const historial = t.comunicados.map(c => ({t:c.t, cat:c.cat, f:c.f, estado:"Publicado"}))
+      .concat([{t:"Reunión de padres — inicio de torneo", cat:"Varias", f:"12 ago", estado:"Programado"}]);
+    document.querySelector("#dir-comunicados-table tbody").innerHTML = historial.map(c => `
+      <tr><td>${c.t}</td><td>${c.cat}</td><td>${c.f}</td>
+      <td><span class="status-pill ${c.estado==='Publicado'?'status-live':'status-sched'}">${c.estado}</span></td></tr>`).join("");
+
+    document.getElementById("dir-format-catalog").innerHTML = Object.values(FORMATS).map(f => `
+      <div class="format-card"><h4>${f.n}</h4><p>${f.desc}</p></div>`).join("");
+
+    document.getElementById("dir-torneos-table").innerHTML = t.torneosConfig.map(cfg => `
+      <tr><td>${cfg.nombre}</td><td>${FORMATS[cfg.formato].n}</td><td>${cfg.categoria}</td>
+      <td><span class="pill-result ${estadoPillClass(cfg.estado)}">${cfg.estado}</span></td></tr>`).join("");
+
+    const formatoSelect = document.getElementById("dir-formato-select");
+    formatoSelect.innerHTML = '<option>Selecciona un formato…</option>' +
+      Object.entries(FORMATS).map(([id,f]) => `<option value="${id}">${f.n}</option>`).join("");
+
+    const categoriaSelect = document.getElementById("dir-categoria-select");
+    categoriaSelect.innerHTML = '<option>Selecciona una categoría…</option>' +
+      t.categorias.map(c => `<option>${c.n}</option>`).join("");
+
+    document.getElementById("dir-pagos-stats").innerHTML = `
+      <div class="mini-stat warn"><div class="n">${t.stats.porConfirmar}</div><div class="l">Por confirmar (comprobante subido)</div></div>
+      <div class="mini-stat bad"><div class="n">${t.stats.pendientes}</div><div class="l">Pendientes (sin comprobante)</div></div>
+    `;
+
+    const cat1 = t.categorias[1] ? t.categorias[1].n : t.categorias[0].n;
+    const cat2 = t.categorias[2] ? t.categorias[2].n : t.categorias[0].n;
+    const cat3 = t.categorias[0].n;
+    document.getElementById("pg-cat1").textContent = cat1;
+    document.getElementById("pg-cat2").textContent = cat2;
+    document.getElementById("pg-cat3").textContent = cat3;
   }
 
   function renderParent(){
-    document.getElementById("par-cat").textContent = "Acudiente — " + TENANTS[currentTenant].categorias[1].n;
+    const t = TENANTS[currentTenant];
+    document.getElementById("par-cat").textContent = "Acudiente — Categoría " + t.categorias[1].n;
+    document.getElementById("par-torneos").innerHTML = t.torneosConfig.map(cfg => `
+      <div class="torneo-row">
+        <div><div class="nombre">${cfg.nombre}</div><div class="formato">${FORMATS[cfg.formato].n} · ${cfg.categoria}</div></div>
+        <span class="pill-result ${estadoPillClass(cfg.estado)}">${cfg.estado}</span>
+      </div>`).join("");
   }
 
   function renderAll(){
@@ -631,6 +773,14 @@
     document.querySelectorAll(".role-tab").forEach(b=>b.classList.toggle("active", b===btn));
     document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
     document.getElementById("view-" + currentRole).classList.add("active");
+  });
+
+  document.getElementById("dirNav").addEventListener("click", (e)=>{
+    const btn = e.target.closest(".nav-item.clickable");
+    if(!btn) return;
+    document.querySelectorAll("#dirNav .nav-item").forEach(b=>b.classList.toggle("active", b===btn));
+    document.querySelectorAll(".dir-view").forEach(v=>v.classList.remove("active"));
+    document.getElementById("dir-" + btn.dataset.section).classList.add("active");
   });
 
   // init
