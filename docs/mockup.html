@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Plataforma de escuelas deportivas</title>
+<style>
+  :root{
+    --bg:#F2F4EF;
+    --surface:#FFFFFF;
+    --surface-alt:#EDF1E8;
+    --sidebar:#101812;
+    --sidebar-ink:#C9D4C2;
+    --ink:#16231B;
+    --ink-soft:#56634E;
+    --ink-faint:#8B9683;
+    --line:#DCE3D3;
+    --brand:#1F7A4D;
+    --brand-ink:#0E3D26;
+    --cta:#C24A1B;
+    --good:#1D7A9C;
+    --good-soft:#DCEEF3;
+    --warn:#B8860B;
+    --warn-soft:#F3EAD2;
+    --bad:#B4432E;
+    --bad-soft:#F5DFD9;
+    --shadow:0 1px 2px rgba(20,30,20,.06), 0 8px 24px -12px rgba(20,30,20,.18);
+    --tenant-accent-light:#1F7A4D;
+    --tenant-accent-dark:#4CAF7D;
+    --tenant-accent:var(--tenant-accent-light);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1410; --surface:#161D17; --surface-alt:#1C241D; --sidebar:#0A100B; --sidebar-ink:#9FB098;
+      --ink:#EAF0E6; --ink-soft:#A9B6A2; --ink-faint:#71806B; --line:#2B342B;
+      --brand:#4CAF7D; --brand-ink:#CFEBDB; --cta:#FF8A56;
+      --good:#5FB6D8; --good-soft:#12303A; --warn:#E0B34D; --warn-soft:#332A10; --bad:#E2685A; --bad-soft:#3A1E19;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+      --tenant-accent:var(--tenant-accent-dark);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1410; --surface:#161D17; --surface-alt:#1C241D; --sidebar:#0A100B; --sidebar-ink:#9FB098;
+    --ink:#EAF0E6; --ink-soft:#A9B6A2; --ink-faint:#71806B; --line:#2B342B;
+    --brand:#4CAF7D; --brand-ink:#CFEBDB; --cta:#FF8A56;
+    --good:#5FB6D8; --good-soft:#12303A; --warn:#E0B34D; --warn-soft:#332A10; --bad:#E2685A; --bad-soft:#3A1E19;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+    --tenant-accent:var(--tenant-accent-dark);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--ink);}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .display{
+    font-family:"Arial Narrow","Helvetica Neue Condensed","Helvetica Neue",Arial,sans-serif;
+    font-weight:800;
+    letter-spacing:.02em;
+  }
+  .mono{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;}
+  button{font-family:inherit;}
+
+  /* disclaimer */
+  .disclaimer{
+    background:var(--cta);
+    color:#fff;
+    text-align:center;
+    font-size:.78rem;
+    font-weight:600;
+    letter-spacing:.03em;
+    padding:.45rem 1rem;
+  }
+
+  /* topbar */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+    box-shadow:var(--shadow);
+  }
+  .topbar-inner{
+    max-width:1180px; margin:0 auto;
+    display:flex; align-items:center; gap:1.4rem;
+    padding:.7rem 1.2rem;
+    flex-wrap:wrap;
+  }
+  .platform-mark{
+    display:flex; align-items:center; gap:.5rem;
+    font-family:"Arial Narrow","Helvetica Neue Condensed",Arial,sans-serif;
+    font-weight:800; letter-spacing:.02em; font-size:1.05rem;
+    white-space:nowrap;
+  }
+  .platform-mark .dot{width:.6rem; height:.6rem; border-radius:50%; background:var(--brand);}
+  .platform-mark .co{
+    font-size:.62rem; font-weight:700; letter-spacing:.08em;
+    background:var(--surface-alt); color:var(--ink-soft);
+    padding:.15rem .4rem; border-radius:3px; margin-left:.15rem;
+  }
+
+  .tenant-switch{display:flex; gap:.4rem; align-items:center;}
+  .tenant-chip{
+    display:flex; align-items:center; gap:.45rem;
+    border:1px solid var(--line); background:var(--surface);
+    border-radius:24px; padding:.3rem .7rem .3rem .3rem;
+    cursor:pointer; font-size:.82rem; color:var(--ink-soft);
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .tenant-chip .logo{
+    width:1.6rem; height:1.6rem; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:"Arial Narrow","Helvetica Neue Condensed",Arial,sans-serif;
+    font-weight:800; font-size:.68rem; color:#fff;
+  }
+  .tenant-chip.active{border-color:var(--tenant-accent); color:var(--ink); font-weight:600;}
+
+  .role-tabs{
+    display:flex; gap:.2rem;
+    margin-left:auto;
+    background:var(--surface-alt);
+    border-radius:8px; padding:.2rem;
+  }
+  .role-tab{
+    border:none; background:transparent; cursor:pointer;
+    padding:.45rem .8rem; border-radius:6px;
+    font-size:.82rem; font-weight:600; color:var(--ink-soft);
+  }
+  .role-tab.active{background:var(--surface); color:var(--ink); box-shadow:var(--shadow);}
+
+  main{max-width:1180px; margin:0 auto; padding:0 1.2rem 4rem;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- PUBLIC VIEW ---------- */
+  .hero{
+    margin-top:1.4rem;
+    border-radius:14px;
+    padding:2.4rem 2rem;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--tenant-accent) 20%, var(--surface)) 0%, var(--surface) 65%);
+    border:1px solid var(--line);
+    display:flex; flex-wrap:wrap; gap:1.6rem; align-items:center; justify-content:space-between;
+  }
+  .hero-left{max-width:34rem;}
+  .hero-eyebrow{
+    display:inline-flex; align-items:center; gap:.4rem;
+    font-size:.72rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--tenant-accent);
+    margin-bottom:.7rem;
+  }
+  .hero h1{font-size:clamp(1.6rem,4vw,2.3rem); margin:0 0 .5rem; text-wrap:balance;}
+  .hero p.tagline{margin:0; color:var(--ink-soft); font-size:1rem;}
+  .hero-cta{
+    display:flex; gap:.7rem; margin-top:1.3rem; flex-wrap:wrap;
+  }
+  .btn{
+    border:none; cursor:pointer; border-radius:8px;
+    padding:.65rem 1.1rem; font-size:.86rem; font-weight:700;
+    display:inline-flex; align-items:center; gap:.4rem;
+  }
+  .btn-primary{background:var(--tenant-accent); color:#0d1410;}
+  .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--ink);}
+
+  .next-tournament{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:1rem 1.2rem; min-width:230px; box-shadow:var(--shadow);
+  }
+  .next-tournament .label{font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); font-weight:700;}
+  .next-tournament .name{font-weight:700; margin:.3rem 0 .15rem;}
+  .next-tournament .when{font-size:.85rem; color:var(--ink-soft);}
+
+  .section{margin-top:2.6rem;}
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:1rem; gap:1rem; flex-wrap:wrap;}
+  .section-head h2{font-size:1.15rem; margin:0;}
+  .section-head .sub{font-size:.85rem; color:var(--ink-faint);}
+
+  .cat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:.9rem;}
+  .cat-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:1rem 1.1rem;
+  }
+  .cat-card h3{margin:0 0 .2rem; font-size:1rem;}
+  .cat-card .edad{font-size:.8rem; color:var(--ink-faint); margin-bottom:.6rem;}
+  .cat-card .row{display:flex; justify-content:space-between; font-size:.82rem; color:var(--ink-soft); padding:.25rem 0; border-top:1px dashed var(--line);}
+  .badge{
+    display:inline-block; padding:.15rem .5rem; border-radius:20px;
+    font-size:.68rem; font-weight:700; letter-spacing:.02em;
+  }
+  .badge.open{background:var(--good-soft); color:var(--good);}
+  .badge.full{background:var(--bad-soft); color:var(--bad);}
+
+  .table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--surface);}
+  table{width:100%; border-collapse:collapse; font-size:.86rem; min-width:520px;}
+  thead th{
+    text-align:left; font-size:.7rem; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-faint); padding:.7rem .9rem; border-bottom:1px solid var(--line); background:var(--surface-alt);
+  }
+  tbody td{padding:.75rem .9rem; border-bottom:1px solid var(--line);}
+  tbody tr:last-child td{border-bottom:none;}
+  .pill-result{padding:.15rem .55rem; border-radius:20px; font-size:.72rem; font-weight:700;}
+  .pill-win{background:var(--good-soft); color:var(--good);}
+  .pill-next{background:var(--warn-soft); color:var(--warn);}
+
+  .feed{display:flex; flex-direction:column; gap:.7rem;}
+  .feed-item{
+    display:flex; gap:.9rem; align-items:flex-start;
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:.9rem 1.1rem;
+  }
+  .feed-item .date{
+    font-family:ui-monospace,monospace; font-size:.72rem; color:var(--ink-faint);
+    white-space:nowrap; padding-top:.15rem; min-width:3.6rem;
+  }
+  .feed-item .body{flex:1;}
+  .feed-item h4{margin:0 0 .2rem; font-size:.92rem; display:flex; align-items:center; gap:.5rem;}
+  .feed-item .cat-tag{font-size:.68rem; color:var(--tenant-accent); font-weight:700; text-transform:uppercase; letter-spacing:.04em;}
+  .new-dot{width:.4rem; height:.4rem; border-radius:50%; background:var(--cta); display:inline-block;}
+
+  .gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:.7rem;}
+  .g-tile{
+    aspect-ratio:4/3; border-radius:10px;
+    background:linear-gradient(150deg, color-mix(in srgb, var(--tenant-accent) 35%, var(--surface-alt)), var(--surface-alt));
+    display:flex; align-items:center; justify-content:center;
+    color:var(--tenant-accent); font-size:1.4rem; border:1px solid var(--line);
+  }
+
+  footer.site-footer{
+    margin-top:3rem; padding:1.6rem 0; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem;
+    font-size:.82rem; color:var(--ink-faint);
+  }
+  footer.site-footer .wa{
+    display:inline-flex; align-items:center; gap:.4rem;
+    color:var(--good); font-weight:700;
+  }
+
+  /* ---------- DIRECTOR VIEW ---------- */
+  .app-shell{
+    margin-top:1.4rem; display:grid; grid-template-columns:210px 1fr;
+    border:1px solid var(--line); border-radius:12px; overflow:hidden; min-height:560px;
+    box-shadow:var(--shadow);
+  }
+  .app-sidebar{background:var(--sidebar); color:var(--sidebar-ink); padding:1.2rem .9rem;}
+  .app-sidebar .who{font-size:.78rem; opacity:.7; margin-bottom:1.1rem;}
+  .app-sidebar .who b{display:block; color:#fff; font-size:.92rem; font-weight:700;}
+  .nav-item{
+    display:flex; align-items:center; gap:.6rem;
+    padding:.55rem .7rem; border-radius:7px; font-size:.86rem;
+    margin-bottom:.15rem; cursor:default;
+  }
+  .nav-item.active{background:rgba(255,255,255,.1); color:#fff; font-weight:600;}
+  .app-main{background:var(--surface); padding:1.6rem 1.8rem;}
+  .app-main h2{margin:0 0 1.2rem; font-size:1.2rem;}
+
+  .stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.8rem; margin-bottom:1.6rem;}
+  .stat-tile{border:1px solid var(--line); border-radius:10px; padding:.9rem 1rem; background:var(--surface-alt);}
+  .stat-tile .n{font-size:1.5rem; font-weight:800; font-variant-numeric:tabular-nums;}
+  .stat-tile .l{font-size:.75rem; color:var(--ink-faint); letter-spacing:.02em;}
+
+  .composer{
+    border:1px solid var(--line); border-radius:10px; padding:1.1rem 1.2rem;
+    background:var(--surface-alt); margin-bottom:1.6rem;
+  }
+  .composer .field-label{font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-weight:700; margin-bottom:.3rem; display:block;}
+  .fake-input{
+    background:var(--surface); border:1px solid var(--line); border-radius:6px;
+    padding:.55rem .7rem; font-size:.86rem; color:var(--ink-faint); margin-bottom:.8rem;
+  }
+  .fake-textarea{min-height:3.2rem;}
+  .composer-row{display:flex; gap:.8rem; flex-wrap:wrap;}
+  .composer-row > div{flex:1; min-width:160px;}
+
+  .status-pill{padding:.15rem .55rem; border-radius:20px; font-size:.72rem; font-weight:700;}
+  .status-live{background:var(--good-soft); color:var(--good);}
+  .status-sched{background:var(--warn-soft); color:var(--warn);}
+
+  /* ---------- PARENT VIEW ---------- */
+  .parent-head{
+    margin-top:1.4rem; display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:1rem;
+  }
+  .parent-head h1{font-size:1.4rem; margin:0 0 .2rem;}
+  .parent-head p{margin:0; color:var(--ink-soft); font-size:.9rem;}
+  .avatar{
+    width:2.6rem; height:2.6rem; border-radius:50%; background:var(--tenant-accent);
+    display:flex; align-items:center; justify-content:center; color:#0d1410; font-weight:800;
+  }
+  .parent-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:1rem; margin-top:1.4rem;}
+  @media (max-width:760px){.parent-grid{grid-template-columns:1fr;} .app-shell{grid-template-columns:1fr;} .app-sidebar{display:none;}}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:1.2rem 1.3rem;}
+  .card .k{font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-weight:700; margin-bottom:.5rem;}
+  .pay-status{display:flex; align-items:center; justify-content:space-between;}
+  .pay-status .amount{font-size:1.5rem; font-weight:800; font-variant-numeric:tabular-nums;}
+  .pay-ok{color:var(--good);}
+  .match-row{display:flex; justify-content:space-between; align-items:center; padding:.5rem 0; border-top:1px dashed var(--line);}
+  .match-row:first-of-type{border-top:none;}
+
+  .note{
+    font-size:.78rem; color:var(--ink-faint); margin-top:2.2rem; padding-top:1rem;
+    border-top:1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+  <div class="disclaimer">PROTOTIPO / PROPUESTA — datos ilustrativos, no es el sitio real de ninguna escuela. Contenido por validar con cada director.</div>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="platform-mark"><span class="dot"></span>torneos.co <span class="co">CO</span></div>
+
+      <div class="tenant-switch" id="tenantSwitch"></div>
+
+      <div class="role-tabs" id="roleTabs">
+        <button class="role-tab" data-role="public">Sitio público</button>
+        <button class="role-tab" data-role="director">Panel director</button>
+        <button class="role-tab" data-role="parent">Portal de padres</button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ================= PUBLIC VIEW ================= -->
+    <section class="view" id="view-public">
+      <div class="hero">
+        <div class="hero-left">
+          <div class="hero-eyebrow">● Escuela deportiva</div>
+          <h1 id="pub-name">—</h1>
+          <p class="tagline" id="pub-tagline">—</p>
+          <div class="hero-cta">
+            <button class="btn btn-primary">Inscribirme ahora</button>
+            <button class="btn btn-ghost">Ver categorías</button>
+          </div>
+        </div>
+        <div class="next-tournament">
+          <div class="label">Próximo torneo</div>
+          <div class="name" id="pub-next-name">—</div>
+          <div class="when" id="pub-next-when">—</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Categorías por edad</h2>
+          <span class="sub">Horarios y cupos actualizados por el director</span>
+        </div>
+        <div class="cat-grid" id="pub-categorias"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Torneos y resultados</h2>
+          <span class="sub">Filtrable por categoría en el sitio real</span>
+        </div>
+        <div class="table-wrap">
+          <table id="pub-torneos">
+            <thead><tr><th>Torneo</th><th>Fecha</th><th>Sede</th><th>Estado</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <h2>Comunicados</h2>
+          <span class="sub">Publicados por el director de la escuela</span>
+        </div>
+        <div class="feed" id="pub-comunicados"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Galería</h2></div>
+        <div class="gallery">
+          <div class="g-tile">📷</div><div class="g-tile">🏆</div><div class="g-tile">📷</div>
+          <div class="g-tile">🎥</div><div class="g-tile">📷</div><div class="g-tile">📷</div>
+        </div>
+      </div>
+
+      <footer class="site-footer">
+        <span id="pub-sede">Sede — Colombia</span>
+        <span class="wa">💬 Escribir por WhatsApp</span>
+      </footer>
+    </section>
+
+    <!-- ================= DIRECTOR VIEW ================= -->
+    <section class="view" id="view-director">
+      <div class="app-shell">
+        <div class="app-sidebar">
+          <div class="who">Sesión de<b id="dir-name">—</b></div>
+          <div class="nav-item active">📋 Resumen</div>
+          <div class="nav-item">📣 Comunicados</div>
+          <div class="nav-item">🏆 Torneos</div>
+          <div class="nav-item">🧒 Categorías</div>
+          <div class="nav-item">💳 Pagos</div>
+          <div class="nav-item">🖼️ Fotos</div>
+          <div class="nav-item">⚙️ Configuración</div>
+        </div>
+        <div class="app-main">
+          <h2>Resumen de la escuela</h2>
+          <div class="stat-row">
+            <div class="stat-tile"><div class="n">3</div><div class="l">Comunicados este mes</div></div>
+            <div class="stat-tile"><div class="n">128</div><div class="l">Deportistas activos</div></div>
+            <div class="stat-tile"><div class="n" style="color:var(--warn)">6</div><div class="l">Pagos pendientes</div></div>
+            <div class="stat-tile"><div class="n" style="color:var(--good)">$4.8M</div><div class="l">Recaudado en agosto (COP)</div></div>
+          </div>
+
+          <div class="composer">
+            <span class="field-label">Nuevo comunicado</span>
+            <div class="fake-input">Ej: Cambio de horario categoría Sub-10</div>
+            <div class="composer-row">
+              <div>
+                <span class="field-label">Categoría destino</span>
+                <div class="fake-input">Todas las categorías ▾</div>
+              </div>
+              <div>
+                <span class="field-label">Publicar</span>
+                <div class="fake-input">Ahora ▾</div>
+              </div>
+            </div>
+            <span class="field-label">Mensaje</span>
+            <div class="fake-input fake-textarea">Escribe el comunicado para los padres de esta categoría…</div>
+            <button class="btn btn-primary" style="background:var(--brand); color:#fff;">Publicar comunicado</button>
+          </div>
+
+          <span class="field-label" style="margin-bottom:.6rem; display:block;">Últimos comunicados</span>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Título</th><th>Categoría</th><th>Fecha</th><th>Estado</th></tr></thead>
+              <tbody>
+                <tr><td>Cambio de horario categoría Sub-10</td><td>Sub-10</td><td>7 ago</td><td><span class="status-pill status-live">Publicado</span></td></tr>
+                <tr><td>Pago de mensualidad de agosto</td><td>Todas</td><td>1 ago</td><td><span class="status-pill status-live">Publicado</span></td></tr>
+                <tr><td>Reunión de padres — inicio de torneo</td><td>Sub-12, Sub-15</td><td>12 ago</td><td><span class="status-pill status-sched">Programado</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PARENT VIEW ================= -->
+    <section class="view" id="view-parent">
+      <div class="parent-head">
+        <div>
+          <h1>Hola, María 👋</h1>
+          <p id="par-cat">Acudiente — Categoría Sub-10</p>
+        </div>
+        <div class="avatar">MG</div>
+      </div>
+
+      <div class="parent-grid">
+        <div class="card">
+          <div class="k">Estado de la mensualidad</div>
+          <div class="pay-status">
+            <div>
+              <div class="amount pay-ok">Al día</div>
+              <div style="font-size:.82rem; color:var(--ink-faint);">Agosto 2026 · pagado el 3 ago vía PSE</div>
+            </div>
+            <button class="btn btn-ghost">Ver historial</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="k">Próximo partido de tu hijo/a</div>
+          <div class="match-row"><span>vs. Escuela Rivera</span><span class="mono" style="font-size:.85rem;">16 ago, 9:00 am</span></div>
+          <div class="match-row"><span>Sede</span><span style="font-size:.85rem; color:var(--ink-soft);">Cancha Municipal</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head"><h2>Comunicados para tu categoría</h2></div>
+        <div class="feed">
+          <div class="feed-item">
+            <div class="date">7 ago</div>
+            <div class="body"><h4><span class="new-dot"></span>Cambio de horario categoría Sub-10</h4>
+            <span class="cat-tag">Sub-10</span></div>
+          </div>
+          <div class="feed-item">
+            <div class="date">1 ago</div>
+            <div class="body"><h4>Pago de mensualidad de agosto</h4>
+            <span class="cat-tag">Todas las categorías</span></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="background:var(--brand); color:#fff; margin-top:1.6rem;">Pagar mensualidad de septiembre</button>
+    </section>
+
+    <p class="note">Mockup estático de exploración — sin backend real. Nombres de escuelas usados como referencia de tus tres sitios; horarios, categorías y cifras son ilustrativos para validar contigo antes de construir.</p>
+  </main>
+
+<script>
+  const TENANTS = {
+    caterpillar: {
+      name: "Club Caterpillar Motor", short: "CM",
+      tagline: "Escuela de motociclismo infantil y juvenil.",
+      sede: "Bogotá, Colombia",
+      accentLight: "#C98A12", accentDark: "#E0A83E",
+      next: { name: "Copa Caterpillar Sub-11", when: "16 ago 2026 · Pista El Salitre" },
+      categorias: [
+        { n: "Pre-infantil", edad: "5–7 años", horario: "Sáb 8:00 am", cupos: "4 cupos", full:false },
+        { n: "Infantil", edad: "8–11 años", horario: "Mar y Jue 4:00 pm", cupos: "Lleno", full:true },
+        { n: "Juvenil", edad: "12–15 años", horario: "Mar y Jue 6:00 pm", cupos: "7 cupos", full:false },
+        { n: "Competición", edad: "16+ años", horario: "Lun a Vie 5:00 pm", cupos: "2 cupos", full:false },
+      ],
+      torneos: [
+        { r: "Copa Caterpillar Sub-11", f: "16 ago 2026", lugar: "Pista El Salitre", estado: "Próximo", win:null },
+        { r: "Nacional Infantil MX", f: "2 ago 2026", lugar: "Circuito Tocancipá", estado: "3er lugar", win:true },
+      ],
+      comunicados: [
+        { t: "Cambio de horario categoría Infantil", cat: "Infantil", f: "7 ago", nuevo: true },
+        { t: "Pago de mensualidad de agosto", cat: "Todas", f: "1 ago", nuevo: false },
+      ],
+    },
+    sierra: {
+      name: "Sierra FC", short: "SF",
+      tagline: "Escuela de formación en fútbol.",
+      sede: "Cali, Colombia",
+      accentLight: "#1F7A4D", accentDark: "#4CAF7D",
+      next: { name: "Copa Sierra Sub-12", when: "16 ago 2026 · Cancha Municipal" },
+      categorias: [
+        { n: "Sub-8", edad: "6–8 años", horario: "Lun y Mié 3:00 pm", cupos: "5 cupos", full:false },
+        { n: "Sub-10", edad: "9–10 años", horario: "Lun y Mié 4:00 pm", cupos: "3 cupos", full:false },
+        { n: "Sub-12", edad: "11–12 años", horario: "Mar y Jue 4:00 pm", cupos: "Lleno", full:true },
+        { n: "Sub-15", edad: "13–15 años", horario: "Mar y Jue 6:00 pm", cupos: "6 cupos", full:false },
+      ],
+      torneos: [
+        { r: "Copa Sierra Sub-12", f: "16 ago 2026", lugar: "Cancha Municipal", estado: "Próximo", win:null },
+        { r: "Liga Local Sub-15", f: "27 jul 2026", lugar: "Coliseo del Sur", estado: "Ganado 3-1", win:true },
+      ],
+      comunicados: [
+        { t: "Cambio de horario categoría Sub-10", cat: "Sub-10", f: "7 ago", nuevo: true },
+        { t: "Reunión de padres — inicio de torneo", cat: "Sub-12, Sub-15", f: "12 ago", nuevo: true },
+        { t: "Pago de mensualidad de agosto", cat: "Todas", f: "1 ago", nuevo: false },
+      ],
+    },
+    fortaleza: {
+      name: "Fortaleza CEIF", short: "FC",
+      tagline: "Centro de formación deportiva integral.",
+      sede: "Medellín, Colombia",
+      accentLight: "#1B3A6B", accentDark: "#6C93D0",
+      next: { name: "Encuentro Fortaleza Multideporte", when: "23 ago 2026 · Coliseo CEIF" },
+      categorias: [
+        { n: "Semillero", edad: "4–6 años", horario: "Sáb 9:00 am", cupos: "8 cupos", full:false },
+        { n: "Formativa", edad: "7–10 años", horario: "Mar y Jue 3:00 pm", cupos: "4 cupos", full:false },
+        { n: "Intermedia", edad: "11–13 años", horario: "Lun, Mié y Vie 4:00 pm", cupos: "Lleno", full:true },
+        { n: "Avanzada", edad: "14+ años", horario: "Lun a Vie 6:00 pm", cupos: "3 cupos", full:false },
+      ],
+      torneos: [
+        { r: "Encuentro Fortaleza Multideporte", f: "23 ago 2026", lugar: "Coliseo CEIF", estado: "Próximo", win:null },
+        { r: "Copa Integración Regional", f: "9 ago 2026", lugar: "Unidad Deportiva Sur", estado: "2do lugar", win:true },
+      ],
+      comunicados: [
+        { t: "Entrega de uniformes categoría Formativa", cat: "Formativa", f: "6 ago", nuevo: true },
+        { t: "Pago de mensualidad de agosto", cat: "Todas", f: "1 ago", nuevo: false },
+      ],
+    },
+  };
+
+  let currentTenant = "sierra";
+  let currentRole = "public";
+
+  function initials(name){ return name.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase(); }
+
+  function renderTenantSwitch(){
+    const el = document.getElementById("tenantSwitch");
+    el.innerHTML = Object.entries(TENANTS).map(([id,t]) => `
+      <button class="tenant-chip ${id===currentTenant?'active':''}" data-tenant="${id}">
+        <span class="logo" style="background:${t.accentLight}">${t.short}</span>
+        ${t.name}
+      </button>`).join("");
+    el.querySelectorAll(".tenant-chip").forEach(btn=>{
+      btn.addEventListener("click", ()=>{ currentTenant = btn.dataset.tenant; renderAll(); });
+    });
+  }
+
+  function renderPublic(){
+    const t = TENANTS[currentTenant];
+    document.documentElement.style.setProperty("--tenant-accent-light", t.accentLight);
+    document.documentElement.style.setProperty("--tenant-accent-dark", t.accentDark);
+
+    document.getElementById("pub-name").textContent = t.name;
+    document.getElementById("pub-tagline").textContent = t.tagline;
+    document.getElementById("pub-sede").textContent = "Sede — " + t.sede;
+    document.getElementById("pub-next-name").textContent = t.next.name;
+    document.getElementById("pub-next-when").textContent = t.next.when;
+
+    document.getElementById("pub-categorias").innerHTML = t.categorias.map(c => `
+      <div class="cat-card">
+        <h3>${c.n}</h3>
+        <div class="edad">${c.edad}</div>
+        <div class="row"><span>Horario</span><span>${c.horario}</span></div>
+        <div class="row"><span>Cupos</span><span class="badge ${c.full?'full':'open'}">${c.cupos}</span></div>
+      </div>`).join("");
+
+    document.querySelector("#pub-torneos tbody").innerHTML = t.torneos.map(r => `
+      <tr>
+        <td>${r.r}</td><td>${r.f}</td><td>${r.lugar}</td>
+        <td><span class="pill-result ${r.win===null?'pill-next':'pill-win'}">${r.estado}</span></td>
+      </tr>`).join("");
+
+    document.getElementById("pub-comunicados").innerHTML = t.comunicados.map(c => `
+      <div class="feed-item">
+        <div class="date">${c.f}</div>
+        <div class="body">
+          <h4>${c.nuevo ? '<span class="new-dot"></span>' : ''}${c.t}</h4>
+          <span class="cat-tag">${c.cat}</span>
+        </div>
+      </div>`).join("");
+  }
+
+  function renderDirector(){
+    document.getElementById("dir-name").textContent = "Director — " + TENANTS[currentTenant].name;
+  }
+
+  function renderParent(){
+    document.getElementById("par-cat").textContent = "Acudiente — " + TENANTS[currentTenant].categorias[1].n;
+  }
+
+  function renderAll(){
+    renderTenantSwitch();
+    renderPublic();
+    renderDirector();
+    renderParent();
+  }
+
+  document.getElementById("roleTabs").addEventListener("click", (e)=>{
+    const btn = e.target.closest(".role-tab");
+    if(!btn) return;
+    currentRole = btn.dataset.role;
+    document.querySelectorAll(".role-tab").forEach(b=>b.classList.toggle("active", b===btn));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    document.getElementById("view-" + currentRole).classList.add("active");
+  });
+
+  // init
+  renderAll();
+  document.querySelector('.role-tab[data-role="public"]').classList.add("active");
+  document.getElementById("view-public").classList.add("active");
+</script>
+</body>
+</html>

@@ -69,7 +69,7 @@ escuelas.
 
 ## Preguntas abiertas
 
-1. ¿País(es) de operación? Define la pasarela de pago y si se necesitan varias monedas.
+1. ~~¿País(es) de operación?~~ **Confirmado: Colombia** — pasarela de pago local (Wompi/ePayco: PSE, tarjeta, Nequi), montos en COP.
 2. ¿Modelo de negocio con las escuelas? Suscripción fija, comisión por pago procesado, o ambas.
 3. ¿Cuántas escuelas entran en el piloto y cuándo? (candidatas: Caterpillar, Sierra FC, Fortaleza CEIF)
 4. ¿Dominio propio por escuela o subdominio compartido de la plataforma?
@@ -80,3 +80,8 @@ escuelas.
 
 Documento visual equivalente (con comparativas y esquema en formato navegable):
 https://claude.ai/code/artifact/a20c5215-cd76-4382-99c1-d339aa27691c
+
+Mockup navegable de la propuesta (sitio público, panel del director y portal
+de padres, con las tres escuelas de referencia): [`mockup.html`](./mockup.html)
+— también publicado en
+https://claude.ai/code/artifact/9993fc45-3053-4257-b491-415816390fe5
