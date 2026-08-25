@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup · Sistema de Inventario Configurable</title>
+<style>
+  :root{
+    --blue:#1749b8;
+    --blue-dark:#0f3487;
+    --blue-light:#eef3ff;
+    --orange:#f5a623;
+    --orange-dark:#e08e00;
+    --ink:#1c2540;
+    --muted:#6b7488;
+    --border:#e3e7f1;
+    --bg:#f4f6fb;
+    --card:#ffffff;
+    --danger:#e5484d;
+    --radius:14px;
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  .app{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    min-height:100vh;
+  }
+  /* ---------- Sidebar: Industrias ---------- */
+  .sidebar{
+    background:var(--blue-dark);
+    color:#fff;
+    padding:22px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:700;
+    font-size:17px;
+    padding:0 6px 14px;
+    border-bottom:1px solid rgba(255,255,255,.15);
+  }
+  .brand .dot{
+    width:34px;height:34px;border-radius:9px;
+    background:var(--orange);
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;
+  }
+  .section-label{
+    text-transform:uppercase;
+    font-size:11px;
+    letter-spacing:.08em;
+    color:rgba(255,255,255,.55);
+    margin:6px 6px 0;
+  }
+  .industry-list{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .industry-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+    color:rgba(255,255,255,.85);
+    transition:background .15s ease;
+    position:relative;
+  }
+  .industry-item:hover{background:rgba(255,255,255,.08);}
+  .industry-item.active{
+    background:var(--orange);
+    color:#1c2540;
+  }
+  .industry-item .emoji{font-size:18px;width:22px;text-align:center;}
+  .industry-item .del{
+    margin-left:auto;
+    opacity:0;
+    background:none;border:none;color:inherit;cursor:pointer;
+    font-size:14px;
+    padding:2px 4px;
+    border-radius:6px;
+  }
+  .industry-item:hover .del{opacity:.6;}
+  .industry-item .del:hover{opacity:1;background:rgba(0,0,0,.15);}
+
+  .add-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1.5px dashed rgba(255,255,255,.35);
+    background:transparent;
+    color:rgba(255,255,255,.85);
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .add-btn:hover{
+    border-color:var(--orange);
+    color:var(--orange);
+    background:rgba(255,255,255,.05);
+  }
+  .add-btn .plus{
+    width:20px;height:20px;border-radius:50%;
+    background:var(--orange);
+    color:#1c2540;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:800;
+    flex:none;
+  }
+  .add-btn.light{
+    border-color:var(--border);
+    color:var(--blue);
+    background:#fff;
+  }
+  .add-btn.light:hover{
+    border-color:var(--orange);
+    background:#fff8ec;
+  }
+
+  .sidebar-footer{
+    margin-top:auto;
+    font-size:11px;
+    color:rgba(255,255,255,.4);
+    padding:10px 6px 0;
+  }
+
+  /* ---------- Main ---------- */
+  .main{
+    padding:26px 34px 60px;
+    max-width:1180px;
+  }
+  .breadcrumb{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:6px;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:18px;
+  }
+  .breadcrumb .crumb{
+    cursor:pointer;
+    padding:4px 8px;
+    border-radius:8px;
+  }
+  .breadcrumb .crumb:hover{background:#e9edf8;color:var(--blue);}
+  .breadcrumb .crumb.current{
+    color:var(--blue);
+    font-weight:700;
+    background:var(--blue-light);
+  }
+  .breadcrumb .sep{color:#c3cadd;}
+
+  .panel-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    margin-bottom:20px;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .panel-header h1{
+    font-size:22px;
+    margin:0 0 4px;
+    color:var(--blue-dark);
+  }
+  .panel-header p{
+    margin:0;
+    color:var(--muted);
+    font-size:13.5px;
+  }
+
+  .btn-primary{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--orange);
+    color:#1c2540;
+    border:none;
+    padding:11px 18px;
+    border-radius:10px;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(245,166,35,.35);
+    transition:transform .1s ease, box-shadow .1s ease;
+    white-space:nowrap;
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(245,166,35,.45);}
+  .btn-primary .plus-circle{
+    width:20px;height:20px;border-radius:50%;
+    background:#1c2540;
+    color:var(--orange);
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:800;
+  }
+
+  /* Classification grid (icons) */
+  .grid-classifications{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+    gap:14px;
+  }
+  .class-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    cursor:pointer;
+    transition:box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+    position:relative;
+  }
+  .class-card:hover{
+    box-shadow:0 8px 20px rgba(23,73,184,.1);
+    transform:translateY(-2px);
+    border-color:#c9d6f5;
+  }
+  .class-card .icon{
+    width:42px;height:42px;
+    border-radius:10px;
+    background:var(--blue-light);
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;
+    flex:none;
+  }
+  .class-card .info b{
+    display:block;
+    color:var(--blue-dark);
+    font-size:14px;
+    letter-spacing:.02em;
+  }
+  .class-card .info span{
+    font-size:12px;
+    color:var(--muted);
+  }
+  .class-card .del{
+    position:absolute;
+    top:8px;right:8px;
+    background:none;border:none;
+    color:var(--muted);
+    opacity:0;
+    cursor:pointer;
+    font-size:14px;
+    padding:3px 6px;
+    border-radius:6px;
+  }
+  .class-card:hover .del{opacity:1;}
+  .class-card .del:hover{background:#fde8e8;color:var(--danger);}
+
+  .add-tile{
+    border:1.5px dashed #c7d1ea;
+    background:#fbfcff;
+    border-radius:var(--radius);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    color:var(--blue);
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+    padding:18px 16px;
+    min-height:78px;
+    transition:all .15s ease;
+  }
+  .add-tile:hover{
+    border-color:var(--orange);
+    background:#fff8ec;
+    color:var(--orange-dark);
+  }
+  .add-tile .plus{
+    width:26px;height:26px;border-radius:50%;
+    background:var(--blue-light);
+    color:var(--blue);
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;font-weight:800;
+  }
+  .add-tile:hover .plus{background:var(--orange);color:#fff;}
+
+  /* Brand list (like the "MARCAS" panel) */
+  .brand-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+    gap:12px;
+  }
+  .brand-chip{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+    cursor:pointer;
+    font-weight:700;
+    font-size:13.5px;
+    color:var(--blue-dark);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    transition:all .15s ease;
+    position:relative;
+  }
+  .brand-chip:hover{
+    border-color:var(--orange);
+    background:#fffaf0;
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(245,166,35,.12);
+  }
+  .brand-chip .count{
+    font-size:11px;
+    font-weight:700;
+    background:var(--blue-light);
+    color:var(--blue);
+    padding:2px 8px;
+    border-radius:999px;
+  }
+  .brand-chip .del{
+    position:absolute;top:6px;right:6px;
+    background:none;border:none;color:var(--muted);
+    opacity:0;cursor:pointer;font-size:13px;padding:2px 5px;border-radius:6px;
+  }
+  .brand-chip:hover .del{opacity:1;}
+  .brand-chip .del:hover{background:#fde8e8;color:var(--danger);}
+
+  /* Product grid (like price cards) */
+  .product-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:16px;
+  }
+  .product-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+    text-align:left;
+    position:relative;
+    transition:box-shadow .15s ease, transform .15s ease;
+  }
+  .product-card:hover{
+    box-shadow:0 10px 22px rgba(23,73,184,.1);
+    transform:translateY(-2px);
+  }
+  .product-card .tag{
+    color:var(--orange-dark);
+    font-weight:700;
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+    display:inline-block;
+  }
+  .product-card .name{
+    color:var(--blue);
+    font-weight:800;
+    font-size:14.5px;
+    line-height:1.3;
+    margin-bottom:14px;
+    min-height:38px;
+  }
+  .product-card .price{
+    font-size:19px;
+    font-weight:800;
+    color:var(--ink);
+  }
+  .product-card .sku{
+    margin-top:6px;
+    font-size:11px;
+    color:var(--muted);
+  }
+  .product-card .del{
+    position:absolute;top:10px;right:10px;
+    background:none;border:none;color:var(--muted);
+    opacity:0;cursor:pointer;font-size:14px;padding:3px 6px;border-radius:6px;
+  }
+  .product-card:hover .del{opacity:1;}
+  .product-card .del:hover{background:#fde8e8;color:var(--danger);}
+
+  .empty-state{
+    border:1.5px dashed var(--border);
+    border-radius:var(--radius);
+    padding:40px 20px;
+    text-align:center;
+    color:var(--muted);
+    background:#fbfcff;
+  }
+  .empty-state b{display:block;color:var(--blue-dark);margin-bottom:6px;font-size:15px;}
+
+  /* Modal */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(15,25,55,.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:#fff;
+    border-radius:16px;
+    width:100%;
+    max-width:420px;
+    padding:26px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  .modal h3{
+    margin:0 0 4px;
+    color:var(--blue-dark);
+    font-size:18px;
+  }
+  .modal p.sub{
+    margin:0 0 18px;
+    color:var(--muted);
+    font-size:13px;
+  }
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    padding:10px 12px;
+    border-radius:9px;
+    border:1.5px solid var(--border);
+    font-size:14px;
+    font-family:inherit;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--blue);
+  }
+  .field-row{display:flex;gap:10px;}
+  .field-row .field{flex:1;}
+  .emoji-picker{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .emoji-opt{
+    width:38px;height:38px;
+    border-radius:9px;
+    border:1.5px solid var(--border);
+    background:#fff;
+    font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .emoji-opt.sel{border-color:var(--orange);background:#fff8ec;}
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:20px;
+  }
+  .btn-ghost{
+    padding:10px 16px;
+    border-radius:9px;
+    border:1.5px solid var(--border);
+    background:#fff;
+    color:var(--muted);
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .btn-ghost:hover{background:#f2f4f9;}
+  .btn-confirm{
+    padding:10px 18px;
+    border-radius:9px;
+    border:none;
+    background:var(--blue);
+    color:#fff;
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .btn-confirm:hover{background:var(--blue-dark);}
+
+  .badge-note{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:#eaf7ee;
+    color:#1f8a4c;
+    font-size:11.5px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:999px;
+    margin-left:10px;
+  }
+
+  @media (max-width:760px){
+    .app{grid-template-columns:1fr;}
+    .sidebar{
+      flex-direction:row;
+      overflow-x:auto;
+      align-items:center;
+    }
+    .industry-list{flex-direction:row;}
+    .main{padding:20px 16px 50px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ================= SIDEBAR: INDUSTRIAS ================= -->
+  <aside class="sidebar">
+    <div class="brand"><span class="dot">📦</span> InvenConfig</div>
+    <div class="section-label">Industrias</div>
+    <div class="industry-list" id="industryList"></div>
+    <button class="add-btn" onclick="openIndustryModal()">
+      <span class="plus">+</span> Nueva industria
+    </button>
+    <div class="sidebar-footer">Mockup estático · datos guardados en tu navegador (localStorage)</div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main">
+    <div class="breadcrumb" id="breadcrumb"></div>
+
+    <div class="panel-header">
+      <div>
+        <h1 id="panelTitle">—</h1>
+        <p id="panelSubtitle"></p>
+      </div>
+      <button class="btn-primary" id="mainAddBtn"></button>
+    </div>
+
+    <div id="content"></div>
+  </main>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">Agregar</h3>
+    <p class="sub" id="modalSub">Completa los datos.</p>
+    <div id="modalFields"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="confirmModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   MODELO DE DATOS
+   Industria -> Clasificaciones -> Marcas (sub-clasificación) -> Productos
+   Todo es configurable: puedes agregar N industrias, N clasificaciones
+   por industria, N marcas por clasificación y N productos por marca.
+   ========================================================================= */
+
+const STORAGE_KEY = "inv_mockup_data_v1";
+
+const seed = {
+  industries: [
+    {
+      id: "ind_repuestos",
+      name: "Repuestos",
+      icon: "🚗",
+      classifications: [
+        {
+          id: "cls_inyeccion",
+          name: "Inyección",
+          icon: "💉",
+          brands: [
+            {
+              id: "brd_bosch",
+              name: "Bosch",
+              products: [
+                { id: "p1", name: "Bomba bencina Corsa/Daewoo universal 3 bar (Bosch) c/accesorios", price: 28900, sku: "INY-BOS-001" },
+                { id: "p2", name: "Inyector Santa Fe 2.2 10/ D4HB Sorento 2.2 10/ Sportage 2.0 11/", price: 258500, sku: "INY-BOS-002" }
+              ]
+            },
+            { id: "brd_china", name: "China", products: [] },
+            {
+              id: "brd_korea", name: "Korea", products: [
+                { id: "p3", name: "Inyector Maxus T-60 Bosch", price: 250000, sku: "INY-KOR-001" }
+              ]
+            },
+            { id: "brd_delphi", name: "Delphi", products: [] },
+            { id: "brd_denso", name: "Denso", products: [] },
+            { id: "brd_japon", name: "Japón", products: [] },
+            { id: "brd_kemp", name: "Kemp", products: [] }
+          ]
+        },
+        {
+          id: "cls_embrague", name: "Embrague", icon: "⚙️",
+          brands: [
+            { id: "brd_e1", name: "Sachs", products: [
+              { id: "p4", name: "Kit de embrague Aveo 1.4 08/", price: 89900, sku: "EMB-SAC-001" }
+            ]},
+            { id: "brd_e2", name: "Valeo", products: [] }
+          ]
+        },
+        {
+          id: "cls_frenos", name: "Frenos", icon: "🛑",
+          brands: [
+            { id: "brd_f1", name: "Bosch", products: [
+              { id: "p5", name: "Pastillas de freno delanteras Sportage 2.0 12/", price: 34900, sku: "FRE-BOS-001" }
+            ]}
+          ]
+        },
+        { id: "cls_distribucion", name: "Distribución", icon: "🔗", brands: [] },
+        { id: "cls_refrigeracion", name: "Refrigeración", icon: "🌡️", brands: [] },
+        { id: "cls_suspension", name: "Suspensión y Dirección", icon: "🛞", brands: [] },
+        { id: "cls_faroleria", name: "Farolería", icon: "💡", brands: [] },
+        { id: "cls_encendido", name: "Encendido", icon: "🔌", brands: [] },
+        { id: "cls_accesorios", name: "Accesorios", icon: "🪑", brands: [] }
+      ]
+    },
+    {
+      id: "ind_ferreteria",
+      name: "Ferretería",
+      icon: "🔧",
+      classifications: [
+        { id: "cls_herramientas", name: "Herramientas manuales", icon: "🔨", brands: [
+          { id: "brd_stanley", name: "Stanley", products: [
+            { id: "p6", name: "Martillo de uña 16 oz mango fibra", price: 8900, sku: "HER-STA-001" }
+          ]}
+        ]},
+        { id: "cls_electricos", name: "Materiales eléctricos", icon: "🔌", brands: [] }
+      ]
+    }
+  ]
+};
+
+let data = loadData();
+let state = { industryId: null, classId: null, brandId: null };
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(seed));
+}
+function saveData(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+function uid(prefix){
+  return prefix + "_" + Math.random().toString(36).slice(2,9);
+}
+function money(n){
+  return "$" + Number(n).toLocaleString("es-CL");
+}
+
+/* ---------- lookups ---------- */
+function getIndustry(id){ return data.industries.find(i=>i.id===id); }
+function getClass(ind, id){ return ind.classifications.find(c=>c.id===id); }
+function getBrand(cls, id){ return cls.brands.find(b=>b.id===id); }
+
+/* ---------- render sidebar ---------- */
+function renderSidebar(){
+  const list = document.getElementById("industryList");
+  list.innerHTML = "";
+  data.industries.forEach(ind=>{
+    const div = document.createElement("div");
+    div.className = "industry-item" + (ind.id===state.industryId ? " active" : "");
+    div.innerHTML = `<span class="emoji">${ind.icon}</span><span>${escapeHtml(ind.name)}</span>
+      <button class="del" title="Eliminar industria" onclick="event.stopPropagation(); deleteIndustry('${ind.id}')">✕</button>`;
+    div.onclick = ()=>{ state.industryId = ind.id; state.classId=null; state.brandId=null; render(); };
+    list.appendChild(div);
+  });
+}
+
+/* ---------- breadcrumb ---------- */
+function renderBreadcrumb(){
+  const bc = document.getElementById("breadcrumb");
+  const parts = [];
+  const ind = getIndustry(state.industryId);
+  parts.push({label: ind ? `${ind.icon} ${ind.name}` : "Selecciona una industria", fn:()=>{state.classId=null; state.brandId=null; render();}, current: !state.classId});
+  if(ind && state.classId){
+    const cls = getClass(ind, state.classId);
+    if(cls){
+      parts.push({label:`${cls.icon} ${cls.name}`, fn:()=>{state.brandId=null; render();}, current: !state.brandId});
+      if(state.brandId){
+        const brd = getBrand(cls, state.brandId);
+        if(brd) parts.push({label: brd.name, fn:()=>{render();}, current:true});
+      }
+    }
+  }
+  bc.innerHTML = "";
+  parts.forEach((p,i)=>{
+    if(i>0){
+      const sep = document.createElement("span");
+      sep.className="sep"; sep.textContent="›";
+      bc.appendChild(sep);
+    }
+    const c = document.createElement("span");
+    c.className = "crumb" + (p.current ? " current" : "");
+    c.textContent = p.label;
+    c.onclick = p.fn;
+    bc.appendChild(c);
+  });
+}
+
+/* ---------- main render dispatcher ---------- */
+function render(){
+  saveData();
+  renderSidebar();
+  renderBreadcrumb();
+
+  const ind = getIndustry(state.industryId);
+  const content = document.getElementById("content");
+  const title = document.getElementById("panelTitle");
+  const subtitle = document.getElementById("panelSubtitle");
+  const mainAddBtn = document.getElementById("mainAddBtn");
+
+  if(!ind){
+    title.textContent = "Ninguna industria seleccionada";
+    subtitle.textContent = "Crea o elige una industria en el panel izquierdo para configurar su clasificación.";
+    mainAddBtn.style.display="none";
+    content.innerHTML = `<div class="empty-state"><b>No hay industria seleccionada</b>Usa "+ Nueva industria" en la barra lateral para comenzar.</div>`;
+    return;
+  }
+
+  const cls = state.classId ? getClass(ind, state.classId) : null;
+  const brd = (cls && state.brandId) ? getBrand(cls, state.brandId) : null;
+
+  if(!cls){
+    // ------- Vista: clasificaciones de la industria -------
+    title.textContent = `Clasificación · ${ind.name}`;
+    subtitle.textContent = "Estas son las categorías configuradas para esta industria. Agrega tantas como necesites.";
+    mainAddBtn.style.display="flex";
+    mainAddBtn.innerHTML = `<span class="plus-circle">+</span> Agregar clasificación`;
+    mainAddBtn.onclick = openClassModal;
+
+    const grid = document.createElement("div");
+    grid.className = "grid-classifications";
+    ind.classifications.forEach(c=>{
+      const totalProducts = c.brands.reduce((s,b)=>s+b.products.length,0);
+      const card = document.createElement("div");
+      card.className = "class-card";
+      card.innerHTML = `
+        <button class="del" title="Eliminar clasificación" onclick="event.stopPropagation(); deleteClass('${c.id}')">✕</button>
+        <div class="icon">${c.icon}</div>
+        <div class="info">
+          <b>${escapeHtml(c.name)}</b>
+          <span>${c.brands.length} marca(s) · ${totalProducts} producto(s)</span>
+        </div>`;
+      card.onclick = ()=>{ state.classId = c.id; state.brandId=null; render(); };
+      grid.appendChild(card);
+    });
+    const addTile = document.createElement("div");
+    addTile.className = "add-tile";
+    addTile.innerHTML = `<span class="plus">+</span> Agregar clasificación`;
+    addTile.onclick = openClassModal;
+    grid.appendChild(addTile);
+
+    content.innerHTML = "";
+    content.appendChild(grid);
+    return;
+  }
+
+  if(!brd){
+    // ------- Vista: marcas (sub-clasificación) de la clasificación -------
+    title.innerHTML = `${cls.icon} ${escapeHtml(cls.name)} <span class="badge-note">MARCAS</span>`;
+    subtitle.textContent = `Sub-clasificación configurable dentro de "${ind.name} → ${cls.name}". Cada marca agrupa sus propios productos.`;
+    mainAddBtn.style.display="flex";
+    mainAddBtn.innerHTML = `<span class="plus-circle">+</span> Agregar marca`;
+    mainAddBtn.onclick = openBrandModal;
+
+    const grid = document.createElement("div");
+    grid.className = "brand-grid";
+    cls.brands.forEach(b=>{
+      const chip = document.createElement("div");
+      chip.className = "brand-chip";
+      chip.innerHTML = `
+        <button class="del" title="Eliminar marca" onclick="event.stopPropagation(); deleteBrand('${b.id}')">✕</button>
+        <span>${escapeHtml(b.name)}</span>
+        <span class="count">${b.products.length}</span>`;
+      chip.onclick = ()=>{ state.brandId = b.id; render(); };
+      grid.appendChild(chip);
+    });
+    const addTile = document.createElement("div");
+    addTile.className = "add-tile";
+    addTile.innerHTML = `<span class="plus">+</span> Agregar marca`;
+    addTile.onclick = openBrandModal;
+    grid.appendChild(addTile);
+
+    content.innerHTML = "";
+    content.appendChild(grid);
+    return;
+  }
+
+  // ------- Vista: productos de la marca -------
+  title.innerHTML = `${escapeHtml(brd.name)} <span class="badge-note">${cls.name.toUpperCase()}</span>`;
+  subtitle.textContent = `Productos configurados para "${ind.name} → ${cls.name} → ${brd.name}".`;
+  mainAddBtn.style.display="flex";
+  mainAddBtn.innerHTML = `<span class="plus-circle">+</span> Agregar producto`;
+  mainAddBtn.onclick = openProductModal;
+
+  content.innerHTML = "";
+  if(brd.products.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.innerHTML = `<b>Sin productos todavía</b>Agrega el primer producto de "${escapeHtml(brd.name)}".`;
+    content.appendChild(empty);
+  } else {
+    const grid = document.createElement("div");
+    grid.className = "product-grid";
+    brd.products.forEach(p=>{
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.innerHTML = `
+        <button class="del" title="Eliminar producto" onclick="event.stopPropagation(); deleteProduct('${p.id}')">✕</button>
+        <span class="tag">${escapeHtml(cls.name)}</span>
+        <div class="name">${escapeHtml(p.name)}</div>
+        <div class="price">${money(p.price)}</div>
+        <div class="sku">SKU: ${escapeHtml(p.sku || "-")}</div>`;
+      grid.appendChild(card);
+    });
+    content.appendChild(grid);
+  }
+  const addTile = document.createElement("div");
+  addTile.className = "add-tile";
+  addTile.style.marginTop = "16px";
+  addTile.innerHTML = `<span class="plus">+</span> Agregar producto`;
+  addTile.onclick = openProductModal;
+  content.appendChild(addTile);
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+/* =========================================================================
+   MODAL genérico para agregar entidades
+   ========================================================================= */
+const ICONS_INDUSTRY = ["🚗","🔧","👕","💊","🍔","📱","🏠","🐾","📚","🧴"];
+const ICONS_CLASS = ["💉","⚙️","🛑","🔗","🌡️","🛞","💡","🔌","🪑","🧰","🎯","🧩"];
+
+let modalMode = null;
+let iconSelection = null;
+
+function openModal(){ document.getElementById("overlay").classList.add("show"); }
+function closeModal(){ document.getElementById("overlay").classList.remove("show"); }
+
+function openIndustryModal(){
+  modalMode = "industry";
+  iconSelection = ICONS_INDUSTRY[0];
+  document.getElementById("modalTitle").textContent = "Nueva industria";
+  document.getElementById("modalSub").textContent = "Define un nuevo rubro de negocio (ej: Repuestos, Ferretería, Ropa, Farmacia...).";
+  document.getElementById("modalFields").innerHTML = `
+    <div class="field">
+      <label>Nombre de la industria</label>
+      <input id="f_name" type="text" placeholder="Ej: Repuestos automotrices" />
+    </div>
+    <div class="field">
+      <label>Ícono</label>
+      <div class="emoji-picker" id="f_icons"></div>
+    </div>`;
+  renderIconPicker(ICONS_INDUSTRY);
+  openModal();
+}
+
+function openClassModal(){
+  modalMode = "class";
+  iconSelection = ICONS_CLASS[0];
+  document.getElementById("modalTitle").textContent = "Nueva clasificación";
+  document.getElementById("modalSub").textContent = `Agrega una categoría dentro de "${getIndustry(state.industryId).name}" (ej: Inyección, Frenos, Suspensión...).`;
+  document.getElementById("modalFields").innerHTML = `
+    <div class="field">
+      <label>Nombre de la clasificación</label>
+      <input id="f_name" type="text" placeholder="Ej: Inyección" />
+    </div>
+    <div class="field">
+      <label>Ícono</label>
+      <div class="emoji-picker" id="f_icons"></div>
+    </div>`;
+  renderIconPicker(ICONS_CLASS);
+  openModal();
+}
+
+function openBrandModal(){
+  modalMode = "brand";
+  const cls = getClass(getIndustry(state.industryId), state.classId);
+  document.getElementById("modalTitle").textContent = "Nueva marca / sub-clasificación";
+  document.getElementById("modalSub").textContent = `Agrega una marca dentro de "${cls.name}" (ej: Bosch, Denso, Delphi...).`;
+  document.getElementById("modalFields").innerHTML = `
+    <div class="field">
+      <label>Nombre de la marca</label>
+      <input id="f_name" type="text" placeholder="Ej: Bosch" />
+    </div>`;
+  openModal();
+}
+
+function openProductModal(){
+  modalMode = "product";
+  const ind = getIndustry(state.industryId);
+  const cls = getClass(ind, state.classId);
+  const brd = getBrand(cls, state.brandId);
+  document.getElementById("modalTitle").textContent = "Nuevo producto";
+  document.getElementById("modalSub").textContent = `Agrega un producto dentro de "${ind.name} → ${cls.name} → ${brd.name}".`;
+  document.getElementById("modalFields").innerHTML = `
+    <div class="field">
+      <label>Nombre del producto</label>
+      <input id="f_name" type="text" placeholder="Ej: Inyector Santa Fe 2.2 D4HB" />
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Precio (CLP)</label>
+        <input id="f_price" type="number" min="0" placeholder="Ej: 28900" />
+      </div>
+      <div class="field">
+        <label>SKU / código</label>
+        <input id="f_sku" type="text" placeholder="Ej: INY-BOS-001" />
+      </div>
+    </div>`;
+  openModal();
+}
+
+function renderIconPicker(icons){
+  const wrap = document.getElementById("f_icons");
+  wrap.innerHTML = "";
+  icons.forEach((ic,i)=>{
+    const btn = document.createElement("div");
+    btn.className = "emoji-opt" + (i===0 ? " sel" : "");
+    btn.textContent = ic;
+    btn.onclick = ()=>{
+      wrap.querySelectorAll(".emoji-opt").forEach(e=>e.classList.remove("sel"));
+      btn.classList.add("sel");
+      iconSelection = ic;
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+function confirmModal(){
+  const nameEl = document.getElementById("f_name");
+  const name = nameEl ? nameEl.value.trim() : "";
+  if(!name){
+    nameEl.style.borderColor = "var(--danger)";
+    nameEl.focus();
+    return;
+  }
+
+  if(modalMode === "industry"){
+    const newInd = { id: uid("ind"), name, icon: iconSelection, classifications: [] };
+    data.industries.push(newInd);
+    state.industryId = newInd.id; state.classId=null; state.brandId=null;
+  }
+  else if(modalMode === "class"){
+    const ind = getIndustry(state.industryId);
+    const newCls = { id: uid("cls"), name, icon: iconSelection, brands: [] };
+    ind.classifications.push(newCls);
+    state.classId = newCls.id; state.brandId=null;
+  }
+  else if(modalMode === "brand"){
+    const ind = getIndustry(state.industryId);
+    const cls = getClass(ind, state.classId);
+    const newBrand = { id: uid("brd"), name, products: [] };
+    cls.brands.push(newBrand);
+    state.brandId = newBrand.id;
+  }
+  else if(modalMode === "product"){
+    const ind = getIndustry(state.industryId);
+    const cls = getClass(ind, state.classId);
+    const brd = getBrand(cls, state.brandId);
+    const price = Number(document.getElementById("f_price").value) || 0;
+    const sku = document.getElementById("f_sku").value.trim();
+    brd.products.push({ id: uid("p"), name, price, sku });
+  }
+
+  closeModal();
+  render();
+}
+
+/* ---------- delete handlers ---------- */
+function deleteIndustry(id){
+  if(!confirm("¿Eliminar esta industria y toda su clasificación configurada?")) return;
+  data.industries = data.industries.filter(i=>i.id!==id);
+  if(state.industryId === id){ state.industryId=null; state.classId=null; state.brandId=null; }
+  render();
+}
+function deleteClass(id){
+  if(!confirm("¿Eliminar esta clasificación (marcas y productos incluidos)?")) return;
+  const ind = getIndustry(state.industryId);
+  ind.classifications = ind.classifications.filter(c=>c.id!==id);
+  if(state.classId === id){ state.classId=null; state.brandId=null; }
+  render();
+}
+function deleteBrand(id){
+  if(!confirm("¿Eliminar esta marca y sus productos?")) return;
+  const cls = getClass(getIndustry(state.industryId), state.classId);
+  cls.brands = cls.brands.filter(b=>b.id!==id);
+  if(state.brandId === id) state.brandId=null;
+  render();
+}
+function deleteProduct(id){
+  if(!confirm("¿Eliminar este producto?")) return;
+  const brd = getBrand(getClass(getIndustry(state.industryId), state.classId), state.brandId);
+  brd.products = brd.products.filter(p=>p.id!==id);
+  render();
+}
+
+/* ---------- init ---------- */
+state.industryId = data.industries[0] ? data.industries[0].id : null;
+render();
+</script>
+</body>
+</html>
