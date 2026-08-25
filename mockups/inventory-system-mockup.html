@@ -396,6 +396,122 @@
   }
   .product-card:hover .del{opacity:1;}
   .product-card .del:hover{background:#fde8e8;color:var(--danger);}
+  .product-card.on-sale{
+    border-color:#f7c877;
+    background:linear-gradient(180deg,#fffaf0 0%,#ffffff 60%);
+  }
+  .product-card .top-row{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:8px;
+    padding-right:22px;
+  }
+  .offer-ribbon{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    background:var(--orange);
+    color:#1c2540;
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:.03em;
+    padding:3px 8px;
+    border-radius:999px;
+    text-transform:uppercase;
+  }
+  .sale-toggle{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px dashed var(--border);
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--muted);
+    cursor:pointer;
+    user-select:none;
+  }
+  .sale-toggle input{
+    width:16px;height:16px;
+    accent-color:var(--orange);
+    cursor:pointer;
+  }
+  .sale-toggle.active{color:var(--orange-dark);}
+
+  /* ---------- Ofertas (home de la industria) ---------- */
+  .offers-section{
+    margin-bottom:26px;
+  }
+  .offers-section .offers-heading{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:12px;
+  }
+  .offers-section .offers-heading h2{
+    font-size:15px;
+    margin:0;
+    color:var(--orange-dark);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .offers-section .offers-heading .count-pill{
+    background:var(--orange);
+    color:#1c2540;
+    font-size:11px;
+    font-weight:800;
+    padding:2px 9px;
+    border-radius:999px;
+  }
+  .offers-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:16px;
+  }
+  .offer-card{
+    background:linear-gradient(180deg,#fff8ec 0%,#ffffff 55%);
+    border:1.5px solid #f4c26b;
+    border-radius:var(--radius);
+    padding:16px;
+    cursor:pointer;
+    transition:box-shadow .15s ease, transform .15s ease;
+  }
+  .offer-card:hover{
+    box-shadow:0 10px 22px rgba(245,166,35,.22);
+    transform:translateY(-2px);
+  }
+  .offer-card .path{
+    font-size:11px;
+    font-weight:700;
+    color:var(--blue);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    margin-bottom:8px;
+  }
+  .offer-card .name{
+    color:var(--ink);
+    font-weight:800;
+    font-size:14px;
+    line-height:1.3;
+    margin-bottom:12px;
+    min-height:36px;
+  }
+  .offer-card .price{
+    font-size:18px;
+    font-weight:800;
+    color:var(--orange-dark);
+  }
+  .offers-empty{
+    border:1.5px dashed var(--border);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    color:var(--muted);
+    font-size:13px;
+    background:#fbfcff;
+  }
 
   .empty-state{
     border:1.5px dashed var(--border);
@@ -474,6 +590,23 @@
     cursor:pointer;
   }
   .emoji-opt.sel{border-color:var(--orange);background:#fff8ec;}
+  .checkbox-field{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:10px 12px;
+    border:1.5px solid var(--border);
+    border-radius:9px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .checkbox-field input{
+    width:17px;height:17px;
+    accent-color:var(--orange);
+    cursor:pointer;
+  }
   .modal-actions{
     display:flex;
     justify-content:flex-end;
@@ -597,14 +730,14 @@ const seed = {
               id: "brd_bosch",
               name: "Bosch",
               products: [
-                { id: "p1", name: "Bomba bencina Corsa/Daewoo universal 3 bar (Bosch) c/accesorios", price: 28900, sku: "INY-BOS-001" },
-                { id: "p2", name: "Inyector Santa Fe 2.2 10/ D4HB Sorento 2.2 10/ Sportage 2.0 11/", price: 258500, sku: "INY-BOS-002" }
+                { id: "p1", name: "Bomba bencina Corsa/Daewoo universal 3 bar (Bosch) c/accesorios", price: 28900, sku: "INY-BOS-001", onSale: true },
+                { id: "p2", name: "Inyector Santa Fe 2.2 10/ D4HB Sorento 2.2 10/ Sportage 2.0 11/", price: 258500, sku: "INY-BOS-002", onSale: false }
               ]
             },
             { id: "brd_china", name: "China", products: [] },
             {
               id: "brd_korea", name: "Korea", products: [
-                { id: "p3", name: "Inyector Maxus T-60 Bosch", price: 250000, sku: "INY-KOR-001" }
+                { id: "p3", name: "Inyector Maxus T-60 Bosch", price: 250000, sku: "INY-KOR-001", onSale: true }
               ]
             },
             { id: "brd_delphi", name: "Delphi", products: [] },
@@ -617,7 +750,7 @@ const seed = {
           id: "cls_embrague", name: "Embrague", icon: "⚙️",
           brands: [
             { id: "brd_e1", name: "Sachs", products: [
-              { id: "p4", name: "Kit de embrague Aveo 1.4 08/", price: 89900, sku: "EMB-SAC-001" }
+              { id: "p4", name: "Kit de embrague Aveo 1.4 08/", price: 89900, sku: "EMB-SAC-001", onSale: false }
             ]},
             { id: "brd_e2", name: "Valeo", products: [] }
           ]
@@ -626,7 +759,7 @@ const seed = {
           id: "cls_frenos", name: "Frenos", icon: "🛑",
           brands: [
             { id: "brd_f1", name: "Bosch", products: [
-              { id: "p5", name: "Pastillas de freno delanteras Sportage 2.0 12/", price: 34900, sku: "FRE-BOS-001" }
+              { id: "p5", name: "Pastillas de freno delanteras Sportage 2.0 12/", price: 34900, sku: "FRE-BOS-001", onSale: true }
             ]}
           ]
         },
@@ -645,7 +778,7 @@ const seed = {
       classifications: [
         { id: "cls_herramientas", name: "Herramientas manuales", icon: "🔨", brands: [
           { id: "brd_stanley", name: "Stanley", products: [
-            { id: "p6", name: "Martillo de uña 16 oz mango fibra", price: 8900, sku: "HER-STA-001" }
+            { id: "p6", name: "Martillo de uña 16 oz mango fibra", price: 8900, sku: "HER-STA-001", onSale: true }
           ]}
         ]},
         { id: "cls_electricos", name: "Materiales eléctricos", icon: "🔌", brands: [] }
@@ -678,6 +811,18 @@ function money(n){
 function getIndustry(id){ return data.industries.find(i=>i.id===id); }
 function getClass(ind, id){ return ind.classifications.find(c=>c.id===id); }
 function getBrand(cls, id){ return cls.brands.find(b=>b.id===id); }
+
+function getIndustryOffers(ind){
+  const offers = [];
+  ind.classifications.forEach(c=>{
+    c.brands.forEach(b=>{
+      b.products.forEach(p=>{
+        if(p.onSale) offers.push({ product:p, classification:c, brand:b });
+      });
+    });
+  });
+  return offers;
+}
 
 /* ---------- render sidebar ---------- */
 function renderSidebar(){
@@ -755,6 +900,33 @@ function render(){
     mainAddBtn.innerHTML = `<span class="plus-circle">+</span> Agregar clasificación`;
     mainAddBtn.onclick = openClassModal;
 
+    content.innerHTML = "";
+
+    // ------- Ofertas de la industria (home) -------
+    const offers = getIndustryOffers(ind);
+    const offersSection = document.createElement("div");
+    offersSection.className = "offers-section";
+    const offersHtml = [`
+      <div class="offers-heading">
+        <h2>🏷️ Ofertas de ${escapeHtml(ind.name)}</h2>
+        <span class="count-pill">${offers.length}</span>
+      </div>`];
+    if(offers.length === 0){
+      offersHtml.push(`<div class="offers-empty">Todavía no hay productos marcados como oferta en esta industria. Activa el check "En oferta" en cualquier producto para que aparezca aquí.</div>`);
+    } else {
+      offersHtml.push(`<div class="offers-grid">${offers.map(o => `
+        <div class="offer-card" data-cls="${o.classification.id}" data-brand="${o.brand.id}">
+          <div class="path">${escapeHtml(o.classification.name)} · ${escapeHtml(o.brand.name)}</div>
+          <div class="name">${escapeHtml(o.product.name)}</div>
+          <div class="price">${money(o.product.price)}</div>
+        </div>`).join("")}</div>`);
+    }
+    offersSection.innerHTML = offersHtml.join("");
+    offersSection.querySelectorAll(".offer-card").forEach(el=>{
+      el.onclick = ()=>{ state.classId = el.dataset.cls; state.brandId = el.dataset.brand; render(); };
+    });
+    content.appendChild(offersSection);
+
     const grid = document.createElement("div");
     grid.className = "grid-classifications";
     ind.classifications.forEach(c=>{
@@ -777,7 +949,6 @@ function render(){
     addTile.onclick = openClassModal;
     grid.appendChild(addTile);
 
-    content.innerHTML = "";
     content.appendChild(grid);
     return;
   }
@@ -831,13 +1002,20 @@ function render(){
     grid.className = "product-grid";
     brd.products.forEach(p=>{
       const card = document.createElement("div");
-      card.className = "product-card";
+      card.className = "product-card" + (p.onSale ? " on-sale" : "");
       card.innerHTML = `
         <button class="del" title="Eliminar producto" onclick="event.stopPropagation(); deleteProduct('${p.id}')">✕</button>
-        <span class="tag">${escapeHtml(cls.name)}</span>
+        <div class="top-row">
+          <span class="tag">${escapeHtml(cls.name)}</span>
+          ${p.onSale ? `<span class="offer-ribbon">🏷️ Oferta</span>` : ``}
+        </div>
         <div class="name">${escapeHtml(p.name)}</div>
         <div class="price">${money(p.price)}</div>
-        <div class="sku">SKU: ${escapeHtml(p.sku || "-")}</div>`;
+        <div class="sku">SKU: ${escapeHtml(p.sku || "-")}</div>
+        <label class="sale-toggle${p.onSale ? " active" : ""}">
+          <input type="checkbox" ${p.onSale ? "checked" : ""} onchange="toggleSale('${p.id}', this.checked)" />
+          En oferta
+        </label>`;
       grid.appendChild(card);
     });
     content.appendChild(grid);
@@ -936,7 +1114,11 @@ function openProductModal(){
         <label>SKU / código</label>
         <input id="f_sku" type="text" placeholder="Ej: INY-BOS-001" />
       </div>
-    </div>`;
+    </div>
+    <label class="checkbox-field">
+      <input id="f_onsale" type="checkbox" />
+      🏷️ Marcar como oferta
+    </label>`;
   openModal();
 }
 
@@ -989,10 +1171,21 @@ function confirmModal(){
     const brd = getBrand(cls, state.brandId);
     const price = Number(document.getElementById("f_price").value) || 0;
     const sku = document.getElementById("f_sku").value.trim();
-    brd.products.push({ id: uid("p"), name, price, sku });
+    const onSale = document.getElementById("f_onsale").checked;
+    brd.products.push({ id: uid("p"), name, price, sku, onSale });
   }
 
   closeModal();
+  render();
+}
+
+/* ---------- oferta toggle ---------- */
+function toggleSale(productId, checked){
+  const ind = getIndustry(state.industryId);
+  const cls = getClass(ind, state.classId);
+  const brd = getBrand(cls, state.brandId);
+  const product = brd.products.find(p=>p.id===productId);
+  if(product) product.onSale = checked;
   render();
 }
 
